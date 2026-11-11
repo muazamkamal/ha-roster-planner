@@ -1,0 +1,7 @@
+# Pins the matching homeassistant release (0.13.375 -> homeassistant==2026.10.4).
+# Bump this to move the local HA instance and test harness together.
+pytest-homeassistant-custom-component==0.13.375
+
+ruff
+mypy
+pre-commit

@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Run HA under the debugger so breakpoints in custom_components/ work.
+      // The config/custom_components symlink is created by post-create.sh and scripts/develop.
+      "name": "Home Assistant",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "homeassistant",
+      "args": ["--config", "${workspaceFolder}/config", "--debug"],
+      "justMyCode": false
+    }
+  ]
+}

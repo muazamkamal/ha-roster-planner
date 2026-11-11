@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Run a local Home Assistant instance that loads the integration from this repo.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# Link the integration into HA's config so edits are picked up on restart
+mkdir -p config/custom_components
+ln -sfn ../../custom_components/roster_planner config/custom_components/roster_planner
+
+exec .venv/bin/hass --config config --debug

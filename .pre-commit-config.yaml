@@ -1,0 +1,19 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: .venv/bin/ruff check --fix
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: ruff format
+        entry: .venv/bin/ruff format
+        language: system
+        types: [python]
+      - id: frontend-lint
+        name: frontend lint and format
+        entry: bash -c 'cd frontend && npm run lint'
+        language: system
+        files: ^frontend/
+        pass_filenames: false

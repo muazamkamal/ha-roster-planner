@@ -1,0 +1,62 @@
+// For format details, see https://aka.ms/devcontainer.json
+{
+  "name": "Roster Planner (HA integration)",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "24"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // Publish 8123 on the host's network interfaces (not just localhost) so the
+  // HA dev instance is reachable from a phone on the same LAN (Companion app).
+  "appPort": ["8123:8123"],
+  "portsAttributes": {
+    "8123": { "label": "Home Assistant" }
+  },
+
+  "containerEnv": {
+    "UV_LINK_MODE": "copy"
+  },
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "keesschollaart.vscode-home-assistant",
+        "anthropic.claude-code"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": ["tests"],
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true
+        },
+        "[typescript][typescriptreact][json][jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.formatOnSave": true
+        },
+        "files.associations": {
+          "config/*.yaml": "home-assistant"
+        }
+      }
+    }
+  },
+
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.claude.json,target=/home/vscode/.claude.json,type=bind,consistency=cached"
+  ]
+}
