@@ -2,18 +2,32 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
+from homeassistant.components import frontend, panel_custom
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.loader import async_get_integration
 
 from . import websocket_api
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    PANEL_BUNDLE,
+    PANEL_COMPONENT,
+    PANEL_ICON,
+    PANEL_STATIC_URL,
+    PANEL_TITLE,
+    PANEL_URL_PATH,
+)
 from .helpers import RosterConfigEntry
 from .store import RosterStore
 
 PLATFORMS = [Platform.CALENDAR]
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+DATA_PANEL_REGISTERED = f"{DOMAIN}_panel_registered"
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -21,7 +35,34 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     # Stores outlive a config entry reload so panel subscriptions stay connected.
     hass.data[DOMAIN] = {}
     websocket_api.async_setup(hass)
+    # Static routes cannot be removed, so this lives here and not in entry setup.
+    await hass.http.async_register_static_paths(
+        [
+            StaticPathConfig(
+                PANEL_STATIC_URL,
+                str(Path(__file__).parent / "frontend"),
+                cache_headers=False,
+            )
+        ]
+    )
     return True
+
+
+async def _async_register_panel(hass: HomeAssistant) -> None:
+    """Add the sidebar panel unless another roster already has."""
+    if hass.data.get(DATA_PANEL_REGISTERED):
+        return
+    hass.data[DATA_PANEL_REGISTERED] = True
+    integration = await async_get_integration(hass, DOMAIN)
+    await panel_custom.async_register_panel(
+        hass,
+        frontend_url_path=PANEL_URL_PATH,
+        webcomponent_name=PANEL_COMPONENT,
+        sidebar_title=PANEL_TITLE,
+        sidebar_icon=PANEL_ICON,
+        module_url=f"{PANEL_STATIC_URL}/{PANEL_BUNDLE}?v={integration.version}",
+        require_admin=False,
+    )
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: RosterConfigEntry) -> bool:
@@ -33,12 +74,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: RosterConfigEntry) -> bo
         stores[entry.entry_id] = store
     entry.runtime_data = store
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    await _async_register_panel(hass)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: RosterConfigEntry) -> bool:
-    """Unload one roster."""
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    """Unload one roster, removing the panel along with the last one."""
+    unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    others = [
+        other
+        for other in hass.config_entries.async_loaded_entries(DOMAIN)
+        if other.entry_id != entry.entry_id
+    ]
+    if unloaded and not others and hass.data.pop(DATA_PANEL_REGISTERED, False):
+        frontend.async_remove_panel(hass, PANEL_URL_PATH)
+    return unloaded
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: RosterConfigEntry) -> None:
