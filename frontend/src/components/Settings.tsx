@@ -1,7 +1,66 @@
-export type SettingsScreen = "list";
+import { useState } from "react";
+import type { ComponentType } from "react";
+import { useRoster } from "../hooks";
+import { Patterns } from "./Patterns";
+import { Rotations } from "./Rotations";
+import { ShiftTypes } from "./ShiftTypes";
+import { ICONS, Icon } from "./ui";
 
-export const SettingsList = () => (
-  <main className="content">
-    <p className="muted">Rule editors arrive in the next milestone.</p>
-  </main>
-);
+interface Screen {
+  title: string;
+  component: ComponentType;
+  readOnly?: boolean;
+}
+
+const SCREENS: Screen[] = [
+  { title: "Shift types", component: ShiftTypes },
+  { title: "Week patterns", component: Patterns },
+  { title: "Rotations", component: Rotations },
+];
+
+export const SettingsList = () => {
+  const { canEdit } = useRoster();
+  const [open, setOpen] = useState<Screen | null>(null);
+  const screens = SCREENS.filter((screen) => canEdit || screen.readOnly);
+
+  if (open) {
+    const Component = open.component;
+    return (
+      <main className="content">
+        <button
+          type="button"
+          className="breadcrumb"
+          onClick={() => setOpen(null)}
+        >
+          <Icon path={ICONS.left} /> Settings
+        </button>
+        <h3 className="screen-title">{open.title}</h3>
+        <Component />
+      </main>
+    );
+  }
+
+  return (
+    <main className="content">
+      {!canEdit && (
+        <p className="muted screen-title">
+          You can view this roster but not change it.
+        </p>
+      )}
+      <ul className="list">
+        {screens.map((screen) => (
+          <li key={screen.title}>
+            <button
+              type="button"
+              className="list-main"
+              onClick={() => setOpen(screen)}
+            >
+              <span>{screen.title}</span>
+              <Icon path={ICONS.right} />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </main>
+  );
+};

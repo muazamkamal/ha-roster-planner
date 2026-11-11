@@ -648,10 +648,16 @@ class RosterData:
 
     def create_rotation(self, payload: dict[str, Any]) -> Rotation:
         """Add a rotation. Without a priority it goes below the existing ones."""
-        if payload.get("priority") is None:
-            lowest = max((r.priority for r in self.rotations.values()), default=-1)
-            payload = {**payload, "priority": lowest + 1}
-        return self._create(self.rotations, Rotation.from_dict, payload)
+        return self._create(
+            self.rotations, Rotation.from_dict, self._with_priority(payload)
+        )
+
+    def _with_priority(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Give a rotation with no priority the lowest one."""
+        if payload.get("priority") is not None:
+            return payload
+        lowest = max((r.priority for r in self.rotations.values()), default=-1)
+        return {**payload, "priority": lowest + 1}
 
     def update_rotation(self, item_id: str, payload: dict[str, Any]) -> Rotation:
         """Change a rotation."""
@@ -696,6 +702,7 @@ class RosterData:
         if kind == "rotation":
             items: dict[str, Any] = draft.rotations
             parser: Any = Rotation.from_dict
+            payload = draft._with_priority(payload)
         elif kind == "variation":
             items = draft.variations
             parser = Variation.from_dict

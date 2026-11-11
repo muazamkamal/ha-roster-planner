@@ -258,3 +258,10 @@ def test_with_draft_replaces_same_id():
     )
     assert draft.variations[existing.id].name == "Edited"
     assert len(draft.variations) == 1
+
+
+def test_with_draft_new_rotation_gets_same_priority_as_saving():
+    data = RosterData()
+    data.create_rotation({**ROTATION, "priority": 3})
+    draft = data.with_draft("rotation", {**ROTATION, "id": "new"})
+    assert draft.rotations["new"].priority == 4

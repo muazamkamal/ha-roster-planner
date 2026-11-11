@@ -373,3 +373,128 @@ input[type="checkbox"] {
 .assignment-times input {
   min-width: 0;
 }
+
+.breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  color: var(--primary-color);
+  font: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.screen-title {
+  margin-bottom: 12px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.list li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 8px;
+  background: var(--card-background-color);
+  border-radius: 10px;
+}
+
+.list-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 8px 12px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.list-main > span:last-child:not(.swatch) {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-detail {
+  display: block;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.swatch {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-row {
+  display: flex;
+  gap: 8px;
+}
+
+.form-row .field {
+  flex: 1;
+  min-width: 0;
+}
+
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.days-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+}
+
+.days-row > span {
+  padding-top: 12px;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+}
+
+.preview-row {
+  display: grid;
+  grid-template-columns: 48px repeat(7, minmax(0, 1fr));
+  align-items: center;
+  gap: 2px;
+}
+
+.preview-cell {
+  padding: 3px 0;
+  text-align: center;
+  background: var(--card-background-color);
+  border-bottom: 2px solid transparent;
+}
