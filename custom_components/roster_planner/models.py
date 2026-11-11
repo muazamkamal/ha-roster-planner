@@ -427,7 +427,7 @@ class RosterData:
                     raise ValidationError(
                         "duplicate_id", f"Duplicate id {parsed.id}", key
                     )
-                target[parsed.id] = parsed  # type: ignore[index, assignment]
+                target[parsed.id] = parsed  # type: ignore[assignment]
         for item in _list_of_dicts(payload, "exceptions"):
             exception = RosterException.from_dict(item)
             if exception.date in data.exceptions:

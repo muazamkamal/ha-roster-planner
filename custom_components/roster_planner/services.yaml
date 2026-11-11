@@ -1,0 +1,41 @@
+set_exception:
+  target:
+    entity:
+      integration: roster_planner
+      domain: calendar
+  fields:
+    date:
+      required: true
+      selector:
+        date:
+    shift_type:
+      selector:
+        text:
+    start:
+      example: "07:00"
+      selector:
+        text:
+    end:
+      example: "15:30"
+      selector:
+        text:
+    label:
+      selector:
+        text:
+    "off":
+      selector:
+        boolean:
+    note:
+      selector:
+        text:
+
+clear_exception:
+  target:
+    entity:
+      integration: roster_planner
+      domain: calendar
+  fields:
+    date:
+      required: true
+      selector:
+        date:

@@ -1,0 +1,13 @@
+{
+  "domain": "roster_planner",
+  "name": "Roster Planner",
+  "codeowners": ["@muazamkamal"],
+  "config_flow": true,
+  "dependencies": ["http", "frontend", "panel_custom", "websocket_api"],
+  "documentation": "https://github.com/muazamkamal/ha-roster-planner",
+  "integration_type": "service",
+  "iot_class": "local_calculated",
+  "issue_tracker": "https://github.com/muazamkamal/ha-roster-planner/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

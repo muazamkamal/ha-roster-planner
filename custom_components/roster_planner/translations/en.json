@@ -1,0 +1,80 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "New roster",
+        "data": {
+          "name": "Roster name",
+          "prefix": "Event title prefix",
+          "location": "Location",
+          "owner": "Owner"
+        },
+        "data_description": {
+          "prefix": "Added before the shift name, for example \"Work: \". Leave empty for just the shift name.",
+          "location": "Shown on every calendar event.",
+          "owner": "This user can edit the roster. Admins can always edit every roster."
+        }
+      }
+    },
+    "error": {
+      "name_required": "Enter a name.",
+      "name_exists": "A roster with this name already exists."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Roster settings",
+        "data": {
+          "name": "Roster name",
+          "prefix": "Event title prefix",
+          "location": "Location",
+          "owner": "Owner"
+        },
+        "data_description": {
+          "prefix": "Added before the shift name, for example \"Work: \". Leave empty for just the shift name.",
+          "location": "Shown on every calendar event.",
+          "owner": "This user can edit the roster. Admins can always edit every roster."
+        }
+      }
+    },
+    "error": {
+      "name_required": "Enter a name.",
+      "name_exists": "A roster with this name already exists."
+    }
+  },
+  "services": {
+    "set_exception": {
+      "name": "Set exception",
+      "description": "Adds or changes a one-off shift on a date, or marks it as a day off.",
+      "fields": {
+        "date": { "name": "Date", "description": "The date to change." },
+        "shift_type": {
+          "name": "Shift type",
+          "description": "Name of the shift type to work."
+        },
+        "start": {
+          "name": "Start",
+          "description": "Custom start time, HH:MM. Use with end."
+        },
+        "end": {
+          "name": "End",
+          "description": "Custom end time, HH:MM. Use with start."
+        },
+        "label": {
+          "name": "Label",
+          "description": "Name for a shift with custom times."
+        },
+        "off": { "name": "Day off", "description": "Cancel the shift on this date." },
+        "note": { "name": "Note", "description": "Optional note." }
+      }
+    },
+    "clear_exception": {
+      "name": "Clear exception",
+      "description": "Removes a one-off change so the date follows the roster again.",
+      "fields": {
+        "date": { "name": "Date", "description": "The date to reset." }
+      }
+    }
+  }
+}
