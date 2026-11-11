@@ -225,7 +225,7 @@ async def _set_exception(
 ) -> dict[str, Any]:
     payload = {
         "date": msg["date"],
-        "assignment": msg["assignment"],
+        "assignment": msg.get("assignment"),
         "note": msg.get("note"),
     }
     result = await entry.runtime_data.async_mutate(
@@ -351,7 +351,7 @@ def async_setup(hass: HomeAssistant) -> None:
         "exception/set",
         {
             vol.Required("date"): cv.date,
-            vol.Required("assignment"): ASSIGNMENT,
+            vol.Optional("assignment"): vol.Any(None, ASSIGNMENT),
             vol.Optional("note"): OPTIONAL_TEXT,
         },
         _set_exception,

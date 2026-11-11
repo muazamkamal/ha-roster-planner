@@ -1317,8 +1317,8 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 	function $t(e) {
 		return e &= -e, 1 < e ? 4 < e ? e & 268435455 ? 16 : 536870912 : 4 : 1;
 	}
-	var en, tn, A, nn, rn, an = !1, on = [], sn = null, cn = null, ln = null, un = /* @__PURE__ */ new Map(), dn = /* @__PURE__ */ new Map(), j = [], fn = "mousedown mouseup touchcancel touchend touchstart auxclick dblclick pointercancel pointerdown pointerup dragend dragstart drop compositionend compositionstart keydown keypress keyup input textInput copy cut paste click change contextmenu reset submit".split(" ");
-	function pn(e, t) {
+	var en, tn, nn, A, rn, an = !1, on = [], sn = null, cn = null, ln = null, un = /* @__PURE__ */ new Map(), dn = /* @__PURE__ */ new Map(), fn = [], pn = "mousedown mouseup touchcancel touchend touchstart auxclick dblclick pointercancel pointerdown pointerup dragend dragstart drop compositionend compositionstart keydown keypress keyup input textInput copy cut paste click change contextmenu reset submit".split(" ");
+	function mn(e, t) {
 		switch (e) {
 			case "focusin":
 			case "focusout":
@@ -1340,7 +1340,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 			case "lostpointercapture": dn.delete(t.pointerId);
 		}
 	}
-	function mn(e, t, n, r, i, a) {
+	function hn(e, t, n, r, i, a) {
 		return e === null || e.nativeEvent !== a ? (e = {
 			blockedOn: t,
 			domEventName: n,
@@ -1349,19 +1349,19 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 			targetContainers: [i]
 		}, t !== null && (t = Ji(t), t !== null && tn(t)), e) : (e.eventSystemFlags |= r, t = e.targetContainers, i !== null && t.indexOf(i) === -1 && t.push(i), e);
 	}
-	function hn(e, t, n, r, i) {
+	function gn(e, t, n, r, i) {
 		switch (t) {
-			case "focusin": return sn = mn(sn, e, t, n, r, i), !0;
-			case "dragenter": return cn = mn(cn, e, t, n, r, i), !0;
-			case "mouseover": return ln = mn(ln, e, t, n, r, i), !0;
+			case "focusin": return sn = hn(sn, e, t, n, r, i), !0;
+			case "dragenter": return cn = hn(cn, e, t, n, r, i), !0;
+			case "mouseover": return ln = hn(ln, e, t, n, r, i), !0;
 			case "pointerover":
 				var a = i.pointerId;
-				return un.set(a, mn(un.get(a) || null, e, t, n, r, i)), !0;
-			case "gotpointercapture": return a = i.pointerId, dn.set(a, mn(dn.get(a) || null, e, t, n, r, i)), !0;
+				return un.set(a, hn(un.get(a) || null, e, t, n, r, i)), !0;
+			case "gotpointercapture": return a = i.pointerId, dn.set(a, hn(dn.get(a) || null, e, t, n, r, i)), !0;
 		}
 		return !1;
 	}
-	function M(e) {
+	function _n(e) {
 		var t = qi(e.target);
 		if (t !== null) {
 			var n = bt(t);
@@ -1369,7 +1369,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 				if (t = n.tag, t === 13) {
 					if (t = xt(n), t !== null) {
 						e.blockedOn = t, rn(e.priority, function() {
-							A(n);
+							nn(n);
 						});
 						return;
 					}
@@ -1381,10 +1381,10 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 		}
 		e.blockedOn = null;
 	}
-	function gn(e) {
+	function j(e) {
 		if (e.blockedOn !== null) return !1;
 		for (var t = e.targetContainers; 0 < t.length;) {
-			var n = En(e.domEventName, e.eventSystemFlags, t[0], e.nativeEvent);
+			var n = Dn(e.domEventName, e.eventSystemFlags, t[0], e.nativeEvent);
 			if (n === null) {
 				n = e.nativeEvent;
 				var r = new n.constructor(n.type, n);
@@ -1394,66 +1394,66 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 		}
 		return !0;
 	}
-	function N(e, t, n) {
-		gn(e) && n.delete(t);
+	function vn(e, t, n) {
+		j(e) && n.delete(t);
 	}
-	function _n() {
-		an = !1, sn !== null && gn(sn) && (sn = null), cn !== null && gn(cn) && (cn = null), ln !== null && gn(ln) && (ln = null), un.forEach(N), dn.forEach(N);
+	function M() {
+		an = !1, sn !== null && j(sn) && (sn = null), cn !== null && j(cn) && (cn = null), ln !== null && j(ln) && (ln = null), un.forEach(vn), dn.forEach(vn);
 	}
-	function vn(e, t) {
-		e.blockedOn === t && (e.blockedOn = null, an || (an = !0, r.unstable_scheduleCallback(r.unstable_NormalPriority, _n)));
+	function yn(e, t) {
+		e.blockedOn === t && (e.blockedOn = null, an || (an = !0, r.unstable_scheduleCallback(r.unstable_NormalPriority, M)));
 	}
-	function yn(e) {
+	function bn(e) {
 		function t(t) {
-			return vn(t, e);
+			return yn(t, e);
 		}
 		if (0 < on.length) {
-			vn(on[0], e);
+			yn(on[0], e);
 			for (var n = 1; n < on.length; n++) {
 				var r = on[n];
 				r.blockedOn === e && (r.blockedOn = null);
 			}
 		}
-		for (sn !== null && vn(sn, e), cn !== null && vn(cn, e), ln !== null && vn(ln, e), un.forEach(t), dn.forEach(t), n = 0; n < j.length; n++) r = j[n], r.blockedOn === e && (r.blockedOn = null);
-		for (; 0 < j.length && (n = j[0], n.blockedOn === null);) M(n), n.blockedOn === null && j.shift();
+		for (sn !== null && yn(sn, e), cn !== null && yn(cn, e), ln !== null && yn(ln, e), un.forEach(t), dn.forEach(t), n = 0; n < fn.length; n++) r = fn[n], r.blockedOn === e && (r.blockedOn = null);
+		for (; 0 < fn.length && (n = fn[0], n.blockedOn === null);) _n(n), n.blockedOn === null && fn.shift();
 	}
-	var bn = x.ReactCurrentBatchConfig, xn = !0;
-	function Sn(e, t, n, r) {
-		var i = k, a = bn.transition;
-		bn.transition = null;
-		try {
-			k = 1, wn(e, t, n, r);
-		} finally {
-			k = i, bn.transition = a;
-		}
-	}
+	var xn = x.ReactCurrentBatchConfig, Sn = !0;
 	function Cn(e, t, n, r) {
-		var i = k, a = bn.transition;
-		bn.transition = null;
+		var i = k, a = xn.transition;
+		xn.transition = null;
 		try {
-			k = 4, wn(e, t, n, r);
+			k = 1, Tn(e, t, n, r);
 		} finally {
-			k = i, bn.transition = a;
+			k = i, xn.transition = a;
 		}
 	}
 	function wn(e, t, n, r) {
-		if (xn) {
-			var i = En(e, t, n, r);
-			if (i === null) yi(e, t, r, Tn, n), pn(e, r);
-			else if (hn(i, e, t, n, r)) r.stopPropagation();
-			else if (pn(e, r), t & 4 && -1 < fn.indexOf(e)) {
+		var i = k, a = xn.transition;
+		xn.transition = null;
+		try {
+			k = 4, Tn(e, t, n, r);
+		} finally {
+			k = i, xn.transition = a;
+		}
+	}
+	function Tn(e, t, n, r) {
+		if (Sn) {
+			var i = Dn(e, t, n, r);
+			if (i === null) yi(e, t, r, En, n), mn(e, r);
+			else if (gn(i, e, t, n, r)) r.stopPropagation();
+			else if (mn(e, r), t & 4 && -1 < pn.indexOf(e)) {
 				for (; i !== null;) {
 					var a = Ji(i);
-					if (a !== null && en(a), a = En(e, t, n, r), a === null && yi(e, t, r, Tn, n), a === i) break;
+					if (a !== null && en(a), a = Dn(e, t, n, r), a === null && yi(e, t, r, En, n), a === i) break;
 					i = a;
 				}
 				i !== null && r.stopPropagation();
 			} else yi(e, t, r, null, n);
 		}
 	}
-	var Tn = null;
-	function En(e, t, n, r) {
-		if (Tn = null, e = $e(r), e = qi(e), e !== null) {
+	var En = null;
+	function Dn(e, t, n, r) {
+		if (En = null, e = $e(r), e = qi(e), e !== null) {
 			if (t = bt(e), t === null) e = null;
 			else if (n = t.tag, n === 13) {
 				if (e = xt(t), e !== null) return e;
@@ -1463,9 +1463,9 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 				e = null;
 			} else t !== e && (e = null);
 		}
-		return Tn = e, null;
+		return En = e, null;
 	}
-	function Dn(e) {
+	function On(e) {
 		switch (e) {
 			case "cancel":
 			case "click":
@@ -1548,42 +1548,42 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 			default: return 16;
 		}
 	}
-	var On = null, kn = null, An = null;
-	function jn() {
-		if (An) return An;
-		var e, t = kn, n = t.length, r, i = "value" in On ? On.value : On.textContent, a = i.length;
+	var kn = null, An = null, jn = null;
+	function Mn() {
+		if (jn) return jn;
+		var e, t = An, n = t.length, r, i = "value" in kn ? kn.value : kn.textContent, a = i.length;
 		for (e = 0; e < n && t[e] === i[e]; e++);
 		var o = n - e;
 		for (r = 1; r <= o && t[n - r] === i[a - r]; r++);
-		return An = i.slice(e, 1 < r ? 1 - r : void 0);
+		return jn = i.slice(e, 1 < r ? 1 - r : void 0);
 	}
-	function Mn(e) {
+	function Nn(e) {
 		var t = e.keyCode;
 		return "charCode" in e ? (e = e.charCode, e === 0 && t === 13 && (e = 13)) : e = t, e === 10 && (e = 13), 32 <= e || e === 13 ? e : 0;
 	}
-	function Nn() {
+	function Pn() {
 		return !0;
 	}
-	function Pn() {
+	function Fn() {
 		return !1;
 	}
-	function Fn(e) {
+	function N(e) {
 		function t(t, n, r, i, a) {
 			for (var o in this._reactName = t, this._targetInst = r, this.type = n, this.nativeEvent = i, this.target = a, this.currentTarget = null, e) e.hasOwnProperty(o) && (t = e[o], this[o] = t ? t(i) : i[o]);
-			return this.isDefaultPrevented = (i.defaultPrevented == null ? !1 === i.returnValue : i.defaultPrevented) ? Nn : Pn, this.isPropagationStopped = Pn, this;
+			return this.isDefaultPrevented = (i.defaultPrevented == null ? !1 === i.returnValue : i.defaultPrevented) ? Pn : Fn, this.isPropagationStopped = Fn, this;
 		}
 		return C(t.prototype, {
 			preventDefault: function() {
 				this.defaultPrevented = !0;
 				var e = this.nativeEvent;
-				e && (e.preventDefault ? e.preventDefault() : typeof e.returnValue != "unknown" && (e.returnValue = !1), this.isDefaultPrevented = Nn);
+				e && (e.preventDefault ? e.preventDefault() : typeof e.returnValue != "unknown" && (e.returnValue = !1), this.isDefaultPrevented = Pn);
 			},
 			stopPropagation: function() {
 				var e = this.nativeEvent;
-				e && (e.stopPropagation ? e.stopPropagation() : typeof e.cancelBubble != "unknown" && (e.cancelBubble = !0), this.isPropagationStopped = Nn);
+				e && (e.stopPropagation ? e.stopPropagation() : typeof e.cancelBubble != "unknown" && (e.cancelBubble = !0), this.isPropagationStopped = Pn);
 			},
 			persist: function() {},
-			isPersistent: Nn
+			isPersistent: Pn
 		}), t;
 	}
 	var In = {
@@ -1595,10 +1595,10 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 		},
 		defaultPrevented: 0,
 		isTrusted: 0
-	}, Ln = Fn(In), Rn = C({}, In, {
+	}, Ln = N(In), Rn = C({}, In, {
 		view: 0,
 		detail: 0
-	}), zn = Fn(Rn), Bn, Vn, Hn, Un = C({}, Rn, {
+	}), zn = N(Rn), Bn, Vn, Hn, Un = C({}, Rn, {
 		screenX: 0,
 		screenY: 0,
 		clientX: 0,
@@ -1621,13 +1621,13 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 		movementY: function(e) {
 			return "movementY" in e ? e.movementY : Vn;
 		}
-	}), Wn = Fn(Un), Gn = Fn(C({}, Un, { dataTransfer: 0 })), Kn = Fn(C({}, Rn, { relatedTarget: 0 })), qn = Fn(C({}, In, {
+	}), Wn = N(Un), Gn = N(C({}, Un, { dataTransfer: 0 })), Kn = N(C({}, Rn, { relatedTarget: 0 })), qn = N(C({}, In, {
 		animationName: 0,
 		elapsedTime: 0,
 		pseudoElement: 0
-	})), Jn = Fn(C({}, In, { clipboardData: function(e) {
+	})), Jn = N(C({}, In, { clipboardData: function(e) {
 		return "clipboardData" in e ? e.clipboardData : window.clipboardData;
-	} })), Yn = Fn(C({}, In, { data: 0 })), Xn = {
+	} })), Yn = N(C({}, In, { data: 0 })), Xn = {
 		Esc: "Escape",
 		Spacebar: " ",
 		Left: "ArrowLeft",
@@ -1690,13 +1690,13 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 	function er() {
 		return $n;
 	}
-	var tr = Fn(C({}, Rn, {
+	var tr = N(C({}, Rn, {
 		key: function(e) {
 			if (e.key) {
 				var t = Xn[e.key] || e.key;
 				if (t !== "Unidentified") return t;
 			}
-			return e.type === "keypress" ? (e = Mn(e), e === 13 ? "Enter" : String.fromCharCode(e)) : e.type === "keydown" || e.type === "keyup" ? Zn[e.keyCode] || "Unidentified" : "";
+			return e.type === "keypress" ? (e = Nn(e), e === 13 ? "Enter" : String.fromCharCode(e)) : e.type === "keydown" || e.type === "keyup" ? Zn[e.keyCode] || "Unidentified" : "";
 		},
 		code: 0,
 		location: 0,
@@ -1708,15 +1708,15 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 		locale: 0,
 		getModifierState: er,
 		charCode: function(e) {
-			return e.type === "keypress" ? Mn(e) : 0;
+			return e.type === "keypress" ? Nn(e) : 0;
 		},
 		keyCode: function(e) {
 			return e.type === "keydown" || e.type === "keyup" ? e.keyCode : 0;
 		},
 		which: function(e) {
-			return e.type === "keypress" ? Mn(e) : e.type === "keydown" || e.type === "keyup" ? e.keyCode : 0;
+			return e.type === "keypress" ? Nn(e) : e.type === "keydown" || e.type === "keyup" ? e.keyCode : 0;
 		}
-	})), nr = Fn(C({}, Un, {
+	})), nr = N(C({}, Un, {
 		pointerId: 0,
 		width: 0,
 		height: 0,
@@ -1727,7 +1727,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 		twist: 0,
 		pointerType: 0,
 		isPrimary: 0
-	})), rr = Fn(C({}, Rn, {
+	})), rr = N(C({}, Rn, {
 		touches: 0,
 		targetTouches: 0,
 		changedTouches: 0,
@@ -1736,11 +1736,11 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 		ctrlKey: 0,
 		shiftKey: 0,
 		getModifierState: er
-	})), ir = Fn(C({}, In, {
+	})), ir = N(C({}, In, {
 		propertyName: 0,
 		elapsedTime: 0,
 		pseudoElement: 0
-	})), ar = Fn(C({}, Un, {
+	})), ar = N(C({}, Un, {
 		deltaX: function(e) {
 			return "deltaX" in e ? e.deltaX : "wheelDeltaX" in e ? -e.wheelDeltaX : 0;
 		},
@@ -1780,7 +1780,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 		}
 	}
 	function _r(e, t) {
-		if (hr) return e === "compositionend" || !sr && pr(e, t) ? (e = jn(), An = kn = On = null, hr = !1, e) : null;
+		if (hr) return e === "compositionend" || !sr && pr(e, t) ? (e = Mn(), jn = An = kn = null, hr = !1, e) : null;
 		switch (e) {
 			case "paste": return null;
 			case "keypress":
@@ -2042,14 +2042,14 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 		}
 	}
 	function vi(e, t, n, r) {
-		switch (Dn(t)) {
+		switch (On(t)) {
 			case 1:
-				var i = Sn;
+				var i = Cn;
 				break;
 			case 4:
-				i = Cn;
+				i = wn;
 				break;
-			default: i = wn;
+			default: i = Tn;
 		}
 		n = i.bind(null, t, n, e), i = void 0, !dt || t !== "touchstart" && t !== "touchmove" && t !== "wheel" || (i = !0), r ? i === void 0 ? e.addEventListener(t, n, !0) : e.addEventListener(t, n, {
 			capture: !0,
@@ -2087,7 +2087,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 				if (s !== void 0) {
 					var c = Ln, l = e;
 					switch (e) {
-						case "keypress": if (Mn(n) === 0) break a;
+						case "keypress": if (Nn(n) === 0) break a;
 						case "keydown":
 						case "keyup":
 							c = tr;
@@ -2240,7 +2240,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 					y = void 0;
 				}
 				else hr ? pr(e, n) && (y = "onCompositionEnd") : e === "keydown" && n.keyCode === 229 && (y = "onCompositionStart");
-				y && (ur && n.locale !== "ko" && (hr || y !== "onCompositionStart" ? y === "onCompositionEnd" && hr && (v = jn()) : (On = i, kn = "value" in On ? On.value : On.textContent, hr = !0)), _ = xi(r, y), 0 < _.length && (y = new Yn(y, e, null, n, i), o.push({
+				y && (ur && n.locale !== "ko" && (hr || y !== "onCompositionStart" ? y === "onCompositionEnd" && hr && (v = Mn()) : (kn = i, An = "value" in kn ? kn.value : kn.textContent, hr = !0)), _ = xi(r, y), 0 < _.length && (y = new Yn(y, e, null, n, i), o.push({
 					event: y,
 					listeners: _
 				}), v ? y.data = v : (v = mr(n), v !== null && (y.data = v)))), (v = lr ? gr(e, n) : _r(e, n)) && (r = xi(r, "onBeforeInput"), 0 < r.length && (i = new Yn("onBeforeInput", "beforeinput", null, n, i), o.push({
@@ -2310,7 +2310,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 			if (e.removeChild(n), i && i.nodeType === 8) {
 				if (n = i.data, n === "/$") {
 					if (r === 0) {
-						e.removeChild(i), yn(t);
+						e.removeChild(i), bn(t);
 						return;
 					}
 					r--;
@@ -2318,7 +2318,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 			}
 			n = i;
 		} while (n);
-		yn(t);
+		bn(t);
 	}
 	function Ri(e) {
 		for (; e != null; e = e.nextSibling) {
@@ -4213,7 +4213,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 	}
 	var bc = !1;
 	function xc(e, t) {
-		if (ki = xn, e = Hr(), Ur(e)) {
+		if (ki = Sn, e = Hr(), Ur(e)) {
 			if ("selectionStart" in e) var n = {
 				start: e.selectionStart,
 				end: e.selectionEnd
@@ -4255,7 +4255,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 		for (Ai = {
 			focusedElem: e,
 			selectionRange: n
-		}, xn = !1, K = t; K !== null;) if (t = K, e = t.child, t.subtreeFlags & 1028 && e !== null) e.return = t, K = e;
+		}, Sn = !1, K = t; K !== null;) if (t = K, e = t.child, t.subtreeFlags & 1028 && e !== null) e.return = t, K = e;
 		else for (; K !== null;) {
 			t = K;
 			try {
@@ -4374,7 +4374,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 				q = null, jc(e, t, n), q = r, Ac = i, q !== null && (Ac ? (e = q, n = n.stateNode, e.nodeType === 8 ? e.parentNode.removeChild(n) : e.removeChild(n)) : q.removeChild(n.stateNode));
 				break;
 			case 18:
-				q !== null && (Ac ? (e = q, n = n.stateNode, e.nodeType === 8 ? Li(e.parentNode, n) : e.nodeType === 1 && Li(e, n), yn(e)) : Li(q, n.stateNode));
+				q !== null && (Ac ? (e = q, n = n.stateNode, e.nodeType === 8 ? Li(e.parentNode, n) : e.nodeType === 1 && Li(e, n), bn(e)) : Li(q, n.stateNode));
 				break;
 			case 4:
 				r = q, i = Ac, q = n.stateNode.containerInfo, Ac = !0, jc(e, t, n), q = r, Ac = i;
@@ -4523,7 +4523,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 				break;
 			case 3:
 				if (Pc(t, e), Ic(e), r & 4 && n !== null && n.memoizedState.isDehydrated) try {
-					yn(t.containerInfo);
+					bn(t.containerInfo);
 				} catch (t) {
 					$(e, e.return, t);
 				}
@@ -4720,7 +4720,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 									var d = u.memoizedState;
 									if (d !== null) {
 										var f = d.dehydrated;
-										f !== null && yn(f);
+										f !== null && bn(f);
 									}
 								}
 							}
@@ -4824,7 +4824,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 		return J & 6 ? D() : dl === -1 ? dl = D() : dl;
 	}
 	function ml(e) {
-		return e.mode & 1 ? J & 2 && Z !== 0 ? Z & -Z : Va.transition === null ? (e = k, e === 0 && (e = window.event, e = e === void 0 ? 16 : Dn(e.type)), e) : (fl === 0 && (fl = Jt()), fl) : 1;
+		return e.mode & 1 ? J & 2 && Z !== 0 ? Z & -Z : Va.transition === null ? (e = k, e === 0 && (e = window.event, e = e === void 0 ? 16 : On(e.type)), e) : (fl === 0 && (fl = Jt()), fl) : 1;
 	}
 	function hl(e, t, n, r) {
 		if (50 < ll) throw ll = 0, ul = null, Error(a(185));
@@ -5209,7 +5209,7 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 			var s = k;
 			k = 1;
 			var c = J;
-			J |= 4, Wc.current = null, xc(e, n), Fc(n, e), Wr(Ai), xn = !!ki, Ai = ki = null, e.current = n, Lc(n, e, i), Ot(), J = c, k = s, Gc.transition = o;
+			J |= 4, Wc.current = null, xc(e, n), Fc(n, e), Wr(Ai), Sn = !!ki, Ai = ki = null, e.current = n, Lc(n, e, i), Ot(), J = c, k = s, Gc.transition = o;
 		} else e.current = n;
 		if (ol && (ol = !1, sl = e, cl = i), o = e.pendingLanes, o === 0 && (al = null), It(n.stateNode, r), gl(e, D()), t !== null) for (r = e.onRecoverableError, n = 0; n < t.length; n++) i = t[n], r(i.value, {
 			componentStack: i.stack,
@@ -5686,14 +5686,14 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 	}
 	pu.prototype.unstable_scheduleHydration = function(e) {
 		if (e) {
-			var t = nn();
+			var t = A();
 			e = {
 				blockedOn: null,
 				target: e,
 				priority: t
 			};
-			for (var n = 0; n < j.length && t !== 0 && t < j[n].priority; n++);
-			j.splice(n, 0, e), n === 0 && M(e);
+			for (var n = 0; n < fn.length && t !== 0 && t < fn[n].priority; n++);
+			fn.splice(n, 0, e), n === 0 && _n(e);
 		}
 	};
 	function mu(e) {
@@ -5762,12 +5762,12 @@ var e = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e
 			var t = oo(e, 134217728);
 			t !== null && hl(t, e, 134217728, pl()), lu(e, 134217728);
 		}
-	}, A = function(e) {
+	}, nn = function(e) {
 		if (e.tag === 13) {
 			var t = ml(e), n = oo(e, t);
 			n !== null && hl(n, e, t, pl()), lu(e, t);
 		}
-	}, nn = function() {
+	}, A = function() {
 		return k;
 	}, rn = function(e, t) {
 		var n = k;
@@ -7311,7 +7311,7 @@ var T = n(), gt = s(), _t = [
 }, zt = (e) => {
 	let t = Ot(e.start, e.end) ? " (+1)" : "";
 	return `${Dt(e.start)}–${Dt(e.end)}${t}`;
-}, Bt = (e) => e.shift?.flag === "extra" ? "extra" : e.exception && (e.shift || e.base) ? "changed" : null, Vt = (e, t) => {
+}, Bt = (e) => e.exception && !e.exception.assignment ? "note" : e.shift?.flag === "extra" ? "extra" : e.exception && (e.shift || e.base) ? "changed" : null, Vt = (e, t) => {
 	let n = Dt(e.start), r = Dt(e.end), i = t.find((t) => t.name === e.title && t.start === n && t.end === r);
 	return i ? {
 		type: "shift",
@@ -7326,7 +7326,7 @@ var T = n(), gt = s(), _t = [
 	change: e.shift !== null,
 	extra: e.shift === null,
 	off: e.shift !== null,
-	reset: e.exception !== null
+	reset: !!e.exception?.assignment
 }), Ut = (e) => {
 	let { shift: t, base: n } = e;
 	return t ? t.source === "exception" ? t.flag === "extra" ? "Extra shift" : n ? `Changed · usually ${zt(n)}` : "Changed" : t.source === "variation" ? `From ${t.source_name}` : `From ${t.source_name} · Week ${t.week}` : e.exception && n ? `Cancelled · usually ${zt(n)}` : "";
@@ -7384,12 +7384,16 @@ var T = n(), gt = s(), _t = [
 		past: n.filter((e) => e.end_date < t).reverse()
 	};
 }, en = (e, t) => {
+	if (!e.assignment) return `Note · ${e.note ?? ""}`;
+	let n = Jt(e.assignment, t);
+	return e.note ? `${n} · ${e.note}` : n;
+}, tn = (e, t) => {
 	let n = [...e].sort((e, t) => e.date.localeCompare(t.date));
 	return {
 		upcoming: n.filter((e) => e.date >= t),
 		past: n.filter((e) => e.date < t).reverse()
 	};
-}, tn = /* @__PURE__ */ e(((e) => {
+}, nn = /* @__PURE__ */ e(((e) => {
 	var t = n(), r = Symbol.for("react.element"), i = Symbol.for("react.fragment"), a = Object.prototype.hasOwnProperty, o = t.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner, s = {
 		key: !0,
 		ref: !0,
@@ -7411,8 +7415,8 @@ var T = n(), gt = s(), _t = [
 	}
 	e.Fragment = i, e.jsx = c, e.jsxs = c;
 })), A = (/* @__PURE__ */ e(((e, t) => {
-	t.exports = tn();
-})))(), nn = 60, rn = ({ onPrevious: e, onNext: t, children: n }) => {
+	t.exports = nn();
+})))(), rn = 60, an = ({ onPrevious: e, onNext: t, children: n }) => {
 	let r = (0, T.useRef)(null);
 	return /* @__PURE__ */ (0, A.jsx)("div", {
 		onTouchStart: (e) => {
@@ -7425,17 +7429,17 @@ var T = n(), gt = s(), _t = [
 		onTouchEnd: (n) => {
 			if (!r.current) return;
 			let i = n.changedTouches[0], a = i.clientX - r.current.x, o = i.clientY - r.current.y;
-			r.current = null, Math.abs(a) < nn || Math.abs(a) < Math.abs(o) * 2 || (a > 0 ? e() : t());
+			r.current = null, Math.abs(a) < rn || Math.abs(a) < Math.abs(o) * 2 || (a > 0 ? e() : t());
 		},
 		children: n
 	});
-}, an = ({ day: e }) => {
+}, on = ({ day: e }) => {
 	let t = Bt(e);
 	return t === "extra" ? /* @__PURE__ */ (0, A.jsx)("span", {
 		className: "marker plus",
 		children: "+"
-	}) : t === "changed" ? /* @__PURE__ */ (0, A.jsx)("span", { className: "marker dot" }) : null;
-}, on = ({ anchor: e, today: t, days: n, onSelect: r }) => /* @__PURE__ */ (0, A.jsx)("div", {
+	}) : t === "changed" ? /* @__PURE__ */ (0, A.jsx)("span", { className: "marker dot" }) : t === "note" ? /* @__PURE__ */ (0, A.jsx)("span", { className: "marker ring" }) : null;
+}, sn = ({ anchor: e, today: t, days: n, onSelect: r }) => /* @__PURE__ */ (0, A.jsx)("div", {
 	className: "week",
 	children: Ct(e).map((e) => {
 		let i = n.get(e), a = [
@@ -7469,11 +7473,11 @@ var T = n(), gt = s(), _t = [
 					className: "week-shift muted",
 					children: i ? "Off" : ""
 				}),
-				i && /* @__PURE__ */ (0, A.jsx)(an, { day: i })
+				i && /* @__PURE__ */ (0, A.jsx)(on, { day: i })
 			]
 		}, e);
 	})
-}), sn = ({ anchor: e, today: t, days: n, onSelect: r, narrow: i }) => /* @__PURE__ */ (0, A.jsxs)("div", {
+}), cn = ({ anchor: e, today: t, days: n, onSelect: r, narrow: i }) => /* @__PURE__ */ (0, A.jsxs)("div", {
 	className: "month",
 	children: [Ct(e).map((e) => /* @__PURE__ */ (0, A.jsx)("span", {
 		className: "month-heading muted",
@@ -7493,7 +7497,7 @@ var T = n(), gt = s(), _t = [
 			onClick: () => o && r(o),
 			children: [/* @__PURE__ */ (0, A.jsxs)("span", {
 				className: "month-number",
-				children: [E(a, "d"), o && /* @__PURE__ */ (0, A.jsx)(an, { day: o })]
+				children: [E(a, "d"), o && /* @__PURE__ */ (0, A.jsx)(on, { day: o })]
 			}), o?.shift && (i ? /* @__PURE__ */ (0, A.jsx)("span", {
 				className: "month-dot",
 				style: { background: o.shift.colour }
@@ -7504,9 +7508,9 @@ var T = n(), gt = s(), _t = [
 			}))]
 		}, a);
 	})]
-}), cn = "__custom", ln = "__off", un = (e) => e.type === "off" ? ln : e.type === "custom" ? cn : e.shift_type_id, dn = ({ value: e, shiftTypes: t, onChange: n, allowOff: r = !0 }) => {
+}), ln = "__custom", un = "__off", dn = (e) => e.type === "off" ? un : e.type === "custom" ? ln : e.shift_type_id, fn = ({ value: e, shiftTypes: t, onChange: n, allowOff: r = !0 }) => {
 	let i = (e) => {
-		n(e === ln ? { type: "off" } : e === cn ? {
+		n(e === un ? { type: "off" } : e === ln ? {
 			type: "custom",
 			start: "09:00",
 			end: "17:00"
@@ -7518,11 +7522,11 @@ var T = n(), gt = s(), _t = [
 	return /* @__PURE__ */ (0, A.jsxs)("div", {
 		className: "assignment",
 		children: [/* @__PURE__ */ (0, A.jsxs)("select", {
-			value: un(e),
+			value: dn(e),
 			onChange: (e) => i(e.target.value),
 			children: [
 				r && /* @__PURE__ */ (0, A.jsx)("option", {
-					value: ln,
+					value: un,
 					children: "Off"
 				}),
 				t.map((e) => /* @__PURE__ */ (0, A.jsxs)("option", {
@@ -7537,7 +7541,7 @@ var T = n(), gt = s(), _t = [
 					]
 				}, e.id)),
 				/* @__PURE__ */ (0, A.jsx)("option", {
-					value: cn,
+					value: ln,
 					children: "Custom times"
 				})
 			]
@@ -7577,7 +7581,7 @@ var T = n(), gt = s(), _t = [
 			})
 		})] })]
 	});
-}, j = {
+}, pn = {
 	menu: "M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z",
 	back: "M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z",
 	left: "M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z",
@@ -7585,7 +7589,7 @@ var T = n(), gt = s(), _t = [
 	gear: "M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z",
 	up: "M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z",
 	down: "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"
-}, fn = ({ path: e }) => /* @__PURE__ */ (0, A.jsx)("svg", {
+}, mn = ({ path: e }) => /* @__PURE__ */ (0, A.jsx)("svg", {
 	viewBox: "0 0 24 24",
 	width: "24",
 	height: "24",
@@ -7594,15 +7598,15 @@ var T = n(), gt = s(), _t = [
 		d: e,
 		fill: "currentColor"
 	})
-}), pn = ({ path: e, label: t, onClick: n, disabled: r }) => /* @__PURE__ */ (0, A.jsx)("button", {
+}), hn = ({ path: e, label: t, onClick: n, disabled: r }) => /* @__PURE__ */ (0, A.jsx)("button", {
 	type: "button",
 	className: "icon-button",
 	"aria-label": t,
 	title: t,
 	onClick: n,
 	disabled: r,
-	children: /* @__PURE__ */ (0, A.jsx)(fn, { path: e })
-}), mn = ({ title: e, onClose: t, children: n }) => ((0, T.useEffect)(() => {
+	children: /* @__PURE__ */ (0, A.jsx)(mn, { path: e })
+}), gn = ({ title: e, onClose: t, children: n }) => ((0, T.useEffect)(() => {
 	let e = (e) => {
 		e.key === "Escape" && t();
 	};
@@ -7618,7 +7622,7 @@ var T = n(), gt = s(), _t = [
 		onClick: (e) => e.stopPropagation(),
 		children: [/* @__PURE__ */ (0, A.jsx)("h2", { children: e }), n]
 	})
-})), hn = ({ title: e, message: t, action: n, onConfirm: r, onCancel: i }) => /* @__PURE__ */ (0, A.jsxs)(mn, {
+})), _n = ({ title: e, message: t, action: n, onConfirm: r, onCancel: i }) => /* @__PURE__ */ (0, A.jsxs)(gn, {
 	title: e,
 	onClose: i,
 	children: [t && /* @__PURE__ */ (0, A.jsx)("p", {
@@ -7638,16 +7642,16 @@ var T = n(), gt = s(), _t = [
 			children: "Cancel"
 		})]
 	})]
-}), M = ({ error: e, field: t }) => e?.field === t ? /* @__PURE__ */ (0, A.jsx)("p", {
+}), j = ({ error: e, field: t }) => e?.field === t ? /* @__PURE__ */ (0, A.jsx)("p", {
 	className: "error",
 	children: e.message
-}) : null, gn = ({ error: e, fields: t = [] }) => e && !t.includes(e.field ?? "") ? /* @__PURE__ */ (0, A.jsx)("p", {
+}) : null, vn = ({ error: e, fields: t = [] }) => e && !t.includes(e.field ?? "") ? /* @__PURE__ */ (0, A.jsx)("p", {
 	className: "error",
 	children: e.message
-}) : null, N = ({ label: e, children: t }) => /* @__PURE__ */ (0, A.jsxs)("label", {
+}) : null, M = ({ label: e, children: t }) => /* @__PURE__ */ (0, A.jsxs)("label", {
 	className: "field",
 	children: [/* @__PURE__ */ (0, A.jsx)("span", { children: e }), t]
-}), _n = (e, t) => {
+}), yn = (e, t) => {
 	let n = e.exception?.assignment;
 	return n && n.type !== "off" ? n : e.shift ? Vt(e.shift, t) : t[0] ? {
 		type: "shift",
@@ -7657,11 +7661,11 @@ var T = n(), gt = s(), _t = [
 		start: "09:00",
 		end: "17:00"
 	};
-}, vn = ({ day: e, onClose: t }) => {
-	let { api: n, config: r, canEdit: i } = O(), { error: a, busy: o, submit: s } = Rt(), [c, l] = (0, T.useState)(!1), [u, d] = (0, T.useState)(e.exception?.note ?? ""), [f, p] = (0, T.useState)(() => _n(e, r.shift_types)), m = Ht(e), h = Ut(e), g = async (e) => {
+}, bn = ({ day: e, onClose: t }) => {
+	let { api: n, config: r, canEdit: i } = O(), { error: a, busy: o, submit: s } = Rt(), [c, l] = (0, T.useState)(!1), [u, d] = (0, T.useState)(e.exception?.note ?? ""), [f, p] = (0, T.useState)(() => yn(e, r.shift_types)), m = Ht(e), h = Ut(e), g = e.exception?.note ?? "", _ = u.trim() !== g, v = async (e) => {
 		await s(e) && t();
-	};
-	return /* @__PURE__ */ (0, A.jsxs)(mn, {
+	}, y = () => u.trim() ? n.setException(e.date, null, u) : n.clearException(e.date), b = () => e.exception?.assignment ? n.setException(e.date, e.exception.assignment, u) : y();
+	return /* @__PURE__ */ (0, A.jsxs)(gn, {
 		title: E(e.date, "EEEE d MMMM"),
 		onClose: t,
 		children: [
@@ -7689,27 +7693,27 @@ var T = n(), gt = s(), _t = [
 				className: "warning",
 				children: "Overlaps the previous day's shift."
 			}),
-			i && c && /* @__PURE__ */ (0, A.jsx)(dn, {
+			i && c && /* @__PURE__ */ (0, A.jsx)(fn, {
 				value: f,
 				shiftTypes: r.shift_types,
 				onChange: p,
 				allowOff: !1
 			}),
-			i && /* @__PURE__ */ (0, A.jsx)(N, {
+			i && /* @__PURE__ */ (0, A.jsx)(M, {
 				label: "Note",
 				children: /* @__PURE__ */ (0, A.jsx)("input", {
 					value: u,
 					onChange: (e) => d(e.target.value)
 				})
 			}),
-			/* @__PURE__ */ (0, A.jsx)(gn, { error: a }),
+			/* @__PURE__ */ (0, A.jsx)(vn, { error: a }),
 			i && /* @__PURE__ */ (0, A.jsx)("div", {
 				className: "actions",
 				children: c ? /* @__PURE__ */ (0, A.jsxs)(A.Fragment, { children: [/* @__PURE__ */ (0, A.jsx)("button", {
 					type: "button",
 					className: "button primary",
 					disabled: o,
-					onClick: () => g(() => n.setException(e.date, f, u)),
+					onClick: () => v(() => n.setException(e.date, f, u)),
 					children: "Save"
 				}), /* @__PURE__ */ (0, A.jsx)("button", {
 					type: "button",
@@ -7717,6 +7721,13 @@ var T = n(), gt = s(), _t = [
 					onClick: () => l(!1),
 					children: "Cancel"
 				})] }) : /* @__PURE__ */ (0, A.jsxs)(A.Fragment, { children: [
+					_ && /* @__PURE__ */ (0, A.jsx)("button", {
+						type: "button",
+						className: "button primary",
+						disabled: o,
+						onClick: () => v(b),
+						children: "Save note"
+					}),
 					m.change && /* @__PURE__ */ (0, A.jsx)("button", {
 						type: "button",
 						className: "button",
@@ -7733,14 +7744,14 @@ var T = n(), gt = s(), _t = [
 						type: "button",
 						className: "button",
 						disabled: o,
-						onClick: () => g(() => n.setException(e.date, { type: "off" }, u)),
+						onClick: () => v(() => n.setException(e.date, { type: "off" }, u)),
 						children: "Day off"
 					}),
 					m.reset && /* @__PURE__ */ (0, A.jsx)("button", {
 						type: "button",
 						className: "button",
 						disabled: o,
-						onClick: () => g(() => n.clearException(e.date)),
+						onClick: () => v(y),
 						children: "Reset to roster"
 					})
 				] })
@@ -7753,8 +7764,8 @@ var T = n(), gt = s(), _t = [
 			})
 		]
 	});
-}, yn = 60, bn = ({ narrow: e }) => {
-	let { today: t } = O(), [n, r] = (0, T.useState)(e ? "week" : "month"), [i, a] = (0, T.useState)(t), [o, s] = (0, T.useState)(null), c = n === "week" ? Ct(i) : wt(i), l = Lt(c[0], c[c.length - 1]), u = Lt(yt(t, -1), yt(t, yn)), d = (0, T.useMemo)(() => new Map((l ?? []).map((e) => [e.date, e])), [l]), f = (e) => a((t) => n === "week" ? yt(t, e * 7) : bt(t, e)), p = It(), m = o ? d.get(o) : void 0, h = n === "week" ? `${E(c[0], "d MMM")} – ${E(c[6], "d MMM")}` : E(i, "MMMM yyyy"), g = (e) => s(e.date);
+}, xn = 60, Sn = ({ narrow: e }) => {
+	let { today: t } = O(), [n, r] = (0, T.useState)(e ? "week" : "month"), [i, a] = (0, T.useState)(t), [o, s] = (0, T.useState)(null), c = n === "week" ? Ct(i) : wt(i), l = Lt(c[0], c[c.length - 1]), u = Lt(yt(t, -1), yt(t, xn)), d = (0, T.useMemo)(() => new Map((l ?? []).map((e) => [e.date, e])), [l]), f = (e) => a((t) => n === "week" ? yt(t, e * 7) : bt(t, e)), p = It(), m = o ? d.get(o) : void 0, h = n === "week" ? `${E(c[0], "d MMM")} – ${E(c[6], "d MMM")}` : E(i, "MMMM yyyy"), g = (e) => s(e.date);
 	return /* @__PURE__ */ (0, A.jsxs)("main", {
 		className: "content",
 		children: [
@@ -7765,8 +7776,8 @@ var T = n(), gt = s(), _t = [
 			/* @__PURE__ */ (0, A.jsxs)("div", {
 				className: "toolbar",
 				children: [
-					/* @__PURE__ */ (0, A.jsx)(pn, {
-						path: j.left,
+					/* @__PURE__ */ (0, A.jsx)(hn, {
+						path: pn.left,
 						label: "Previous",
 						onClick: () => f(-1)
 					}),
@@ -7774,8 +7785,8 @@ var T = n(), gt = s(), _t = [
 						className: "toolbar-title",
 						children: h
 					}),
-					/* @__PURE__ */ (0, A.jsx)(pn, {
-						path: j.right,
+					/* @__PURE__ */ (0, A.jsx)(hn, {
+						path: pn.right,
 						label: "Next",
 						onClick: () => f(1)
 					}),
@@ -7796,15 +7807,15 @@ var T = n(), gt = s(), _t = [
 					})
 				]
 			}),
-			/* @__PURE__ */ (0, A.jsx)(rn, {
+			/* @__PURE__ */ (0, A.jsx)(an, {
 				onPrevious: () => f(-1),
 				onNext: () => f(1),
-				children: n === "week" ? /* @__PURE__ */ (0, A.jsx)(on, {
+				children: n === "week" ? /* @__PURE__ */ (0, A.jsx)(sn, {
 					anchor: i,
 					today: t,
 					days: d,
 					onSelect: g
-				}) : /* @__PURE__ */ (0, A.jsx)(sn, {
+				}) : /* @__PURE__ */ (0, A.jsx)(cn, {
 					anchor: i,
 					today: t,
 					days: d,
@@ -7812,13 +7823,13 @@ var T = n(), gt = s(), _t = [
 					narrow: e
 				})
 			}),
-			m && /* @__PURE__ */ (0, A.jsx)(vn, {
+			m && /* @__PURE__ */ (0, A.jsx)(bn, {
 				day: m,
 				onClose: () => s(null)
 			}, m.date)
 		]
 	});
-}, xn = () => {
+}, Cn = () => {
 	let { api: e, canEdit: t, today: n } = O(), { error: r, busy: i, submit: a, setError: o } = Rt(), [s, c] = (0, T.useState)(null), [l, u] = (0, T.useState)(null), [d, f] = (0, T.useState)(!1);
 	return /* @__PURE__ */ (0, A.jsxs)("div", {
 		className: "form",
@@ -7865,12 +7876,12 @@ var T = n(), gt = s(), _t = [
 					}
 				})]
 			}),
-			/* @__PURE__ */ (0, A.jsx)(gn, { error: r }),
+			/* @__PURE__ */ (0, A.jsx)(vn, { error: r }),
 			d && /* @__PURE__ */ (0, A.jsx)("p", {
 				className: "muted",
 				children: "Roster restored."
 			}),
-			l !== null && /* @__PURE__ */ (0, A.jsx)(hn, {
+			l !== null && /* @__PURE__ */ (0, A.jsx)(_n, {
 				title: "Replace this roster?",
 				message: "Everything in this roster will be replaced by the file's contents.",
 				action: "Replace",
@@ -7882,13 +7893,13 @@ var T = n(), gt = s(), _t = [
 			})
 		]
 	});
-}, Sn = ({ item: e, onRemove: t }) => {
+}, wn = ({ item: e, onRemove: t }) => {
 	let { config: n } = O();
 	return /* @__PURE__ */ (0, A.jsxs)("li", { children: [/* @__PURE__ */ (0, A.jsx)("span", {
 		className: "list-main",
-		children: /* @__PURE__ */ (0, A.jsxs)("span", { children: [E(e.date, "EEE d MMM yyyy"), /* @__PURE__ */ (0, A.jsxs)("span", {
+		children: /* @__PURE__ */ (0, A.jsxs)("span", { children: [E(e.date, "EEE d MMM yyyy"), /* @__PURE__ */ (0, A.jsx)("span", {
 			className: "muted list-detail",
-			children: [Jt(e.assignment, n.shift_types), e.note ? ` · ${e.note}` : ""]
+			children: en(e, n.shift_types)
 		})] })
 	}), /* @__PURE__ */ (0, A.jsx)("button", {
 		type: "button",
@@ -7896,17 +7907,17 @@ var T = n(), gt = s(), _t = [
 		onClick: () => t(e),
 		children: "Remove"
 	})] });
-}, Cn = () => {
-	let { api: e, config: t, today: n } = O(), { error: r, submit: i } = Rt(), [a, o] = (0, T.useState)(null), [s, c] = (0, T.useState)(!1), { upcoming: l, past: u } = en(t.exceptions, n);
+}, Tn = () => {
+	let { api: e, config: t, today: n } = O(), { error: r, submit: i } = Rt(), [a, o] = (0, T.useState)(null), [s, c] = (0, T.useState)(!1), { upcoming: l, past: u } = tn(t.exceptions, n);
 	return /* @__PURE__ */ (0, A.jsxs)(A.Fragment, { children: [
-		/* @__PURE__ */ (0, A.jsx)(gn, { error: r }),
+		/* @__PURE__ */ (0, A.jsx)(vn, { error: r }),
 		l.length === 0 && u.length === 0 && /* @__PURE__ */ (0, A.jsx)("p", {
 			className: "muted",
 			children: "No one-off changes."
 		}),
 		/* @__PURE__ */ (0, A.jsx)("ul", {
 			className: "list",
-			children: l.map((e) => /* @__PURE__ */ (0, A.jsx)(Sn, {
+			children: l.map((e) => /* @__PURE__ */ (0, A.jsx)(wn, {
 				item: e,
 				onRemove: o
 			}, e.date))
@@ -7919,14 +7930,14 @@ var T = n(), gt = s(), _t = [
 		}),
 		s && /* @__PURE__ */ (0, A.jsx)("ul", {
 			className: "list past",
-			children: u.map((e) => /* @__PURE__ */ (0, A.jsx)(Sn, {
+			children: u.map((e) => /* @__PURE__ */ (0, A.jsx)(wn, {
 				item: e,
 				onRemove: o
 			}, e.date))
 		}),
-		a && /* @__PURE__ */ (0, A.jsx)(hn, {
+		a && /* @__PURE__ */ (0, A.jsx)(_n, {
 			title: `Remove the change on ${E(a.date, "d MMM")}?`,
-			message: "This date will follow the roster again.",
+			message: a.assignment ? "This date will follow the roster again." : "The note will be removed.",
 			action: "Remove",
 			onConfirm: async () => {
 				if (!a) return;
@@ -7936,15 +7947,15 @@ var T = n(), gt = s(), _t = [
 			onCancel: () => o(null)
 		})
 	] });
-}, wn = ({ kind: e, item: t, replacements: n = [], onClose: r }) => {
+}, En = ({ kind: e, item: t, replacements: n = [], onClose: r }) => {
 	let { api: i } = O(), { error: a, busy: o, submit: s } = Rt(), [c, l] = (0, T.useState)(n[0]?.id ?? ""), u = a?.code === "in_use", d = async (n) => {
 		await s(() => i.remove(e, t.id, n)) && r();
 	};
-	return /* @__PURE__ */ (0, A.jsxs)(mn, {
+	return /* @__PURE__ */ (0, A.jsxs)(gn, {
 		title: `Delete ${t.name}?`,
 		onClose: r,
 		children: [
-			/* @__PURE__ */ (0, A.jsx)(gn, { error: a }),
+			/* @__PURE__ */ (0, A.jsx)(vn, { error: a }),
 			u && n.length > 0 && /* @__PURE__ */ (0, A.jsx)("select", {
 				"aria-label": "Replace with",
 				value: c,
@@ -7977,14 +7988,14 @@ var T = n(), gt = s(), _t = [
 			})
 		]
 	});
-}, Tn = { type: "off" }, En = ({ days: e, onChange: t }) => {
+}, Dn = { type: "off" }, On = ({ days: e, onChange: t }) => {
 	let { config: n } = O();
 	return /* @__PURE__ */ (0, A.jsx)("div", {
 		className: "days",
 		children: _t.map((r) => /* @__PURE__ */ (0, A.jsxs)("div", {
 			className: "days-row",
-			children: [/* @__PURE__ */ (0, A.jsx)("span", { children: qt(r).slice(0, 3) }), /* @__PURE__ */ (0, A.jsx)(dn, {
-				value: e[r] ?? Tn,
+			children: [/* @__PURE__ */ (0, A.jsx)("span", { children: qt(r).slice(0, 3) }), /* @__PURE__ */ (0, A.jsx)(fn, {
+				value: e[r] ?? Dn,
 				shiftTypes: n.shift_types,
 				onChange: (n) => t({
 					...e,
@@ -7993,27 +8004,27 @@ var T = n(), gt = s(), _t = [
 			})]
 		}, r))
 	});
-}, Dn = ({ item: e, onClose: t }) => {
+}, kn = ({ item: e, onClose: t }) => {
 	let { api: n } = O(), { error: r, busy: i, submit: a } = Rt(), [o, s] = (0, T.useState)(e.name), [c, l] = (0, T.useState)(e.days);
 	return /* @__PURE__ */ (0, A.jsxs)("div", {
 		className: "form",
 		children: [
-			/* @__PURE__ */ (0, A.jsx)(N, {
+			/* @__PURE__ */ (0, A.jsx)(M, {
 				label: "Name",
 				children: /* @__PURE__ */ (0, A.jsx)("input", {
 					value: o,
 					onChange: (e) => s(e.target.value)
 				})
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: r,
 				field: "name"
 			}),
-			/* @__PURE__ */ (0, A.jsx)(En, {
+			/* @__PURE__ */ (0, A.jsx)(On, {
 				days: c,
 				onChange: l
 			}),
-			/* @__PURE__ */ (0, A.jsx)(gn, {
+			/* @__PURE__ */ (0, A.jsx)(vn, {
 				error: r,
 				fields: ["name"]
 			}),
@@ -8040,9 +8051,9 @@ var T = n(), gt = s(), _t = [
 			})
 		]
 	});
-}, On = () => {
+}, An = () => {
 	let { config: e } = O(), [t, n] = (0, T.useState)(null), [r, i] = (0, T.useState)(null);
-	return t ? /* @__PURE__ */ (0, A.jsx)(Dn, {
+	return t ? /* @__PURE__ */ (0, A.jsx)(kn, {
 		item: t,
 		onClose: () => n(null)
 	}) : /* @__PURE__ */ (0, A.jsxs)(A.Fragment, { children: [
@@ -8084,21 +8095,21 @@ var T = n(), gt = s(), _t = [
 			}),
 			children: "Add week pattern"
 		}),
-		r && /* @__PURE__ */ (0, A.jsx)(wn, {
+		r && /* @__PURE__ */ (0, A.jsx)(En, {
 			kind: "pattern",
 			item: r,
 			replacements: e.patterns.filter((e) => e.id !== r.id),
 			onClose: () => i(null)
 		})
 	] });
-}, kn = 300, An = ({ kind: e, draft: t, start: n, weeks: r }) => {
+}, jn = 300, Mn = ({ kind: e, draft: t, start: n, weeks: r }) => {
 	let { api: i, config: a } = O(), [o, s] = (0, T.useState)(null), [c, l] = (0, T.useState)(null), u = JSON.stringify(t);
 	if ((0, T.useEffect)(() => {
 		let t = !0, a = setTimeout(() => {
 			i.preview(e, JSON.parse(u), n, yt(n, r * 7 - 1)).then((e) => {
 				t && (s(e), l(null));
 			}, (e) => t && l(e));
-		}, kn);
+		}, jn);
 		return () => {
 			t = !1, clearTimeout(a);
 		};
@@ -8131,14 +8142,14 @@ var T = n(), gt = s(), _t = [
 			}, e.date))]
 		}, e[0].date))
 	});
-}, jn = [
+}, Nn = [
 	"name",
 	"anchor",
 	"cycle_weeks",
 	"slots",
 	"active_from",
 	"active_until"
-], Mn = 8, Nn = 12, Pn = (e) => Math.min(Nn, Math.max(1, Math.round(e) || 1)), Fn = ({ item: e, onClose: t }) => {
+], Pn = 8, Fn = 12, N = (e) => Math.min(Fn, Math.max(1, Math.round(e) || 1)), In = ({ item: e, onClose: t }) => {
 	let { api: n, config: r, today: i } = O(), { error: a, busy: o, submit: s } = Rt(), c = xt(i), [l, u] = (0, T.useState)(e?.name ?? ""), [d, f] = (0, T.useState)(e?.anchor ?? c), [p, m] = (0, T.useState)(e?.slots ?? [r.patterns[0]?.id ?? null]), [h, g] = (0, T.useState)(e?.active_from ?? c), [_, v] = (0, T.useState)(e?.active_until ?? ""), y = {
 		name: l,
 		anchor: d,
@@ -8153,46 +8164,46 @@ var T = n(), gt = s(), _t = [
 	return /* @__PURE__ */ (0, A.jsxs)("div", {
 		className: "form",
 		children: [
-			/* @__PURE__ */ (0, A.jsx)(N, {
+			/* @__PURE__ */ (0, A.jsx)(M, {
 				label: "Name",
 				children: /* @__PURE__ */ (0, A.jsx)("input", {
 					value: l,
 					onChange: (e) => u(e.target.value)
 				})
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: a,
 				field: "name"
 			}),
 			/* @__PURE__ */ (0, A.jsxs)("div", {
 				className: "form-row",
-				children: [/* @__PURE__ */ (0, A.jsx)(N, {
+				children: [/* @__PURE__ */ (0, A.jsx)(M, {
 					label: "Start date (a Monday)",
 					children: /* @__PURE__ */ (0, A.jsx)("input", {
 						type: "date",
 						value: d,
 						onChange: (e) => e.target.value && f(xt(e.target.value))
 					})
-				}), /* @__PURE__ */ (0, A.jsx)(N, {
+				}), /* @__PURE__ */ (0, A.jsx)(M, {
 					label: "Cycle length (weeks)",
 					children: /* @__PURE__ */ (0, A.jsx)("input", {
 						type: "number",
 						min: 1,
-						max: Nn,
+						max: Fn,
 						value: p.length,
-						onChange: (e) => m(Yt(p, Pn(Number(e.target.value))))
+						onChange: (e) => m(Yt(p, N(Number(e.target.value))))
 					})
 				})]
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: a,
 				field: "anchor"
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: a,
 				field: "cycle_weeks"
 			}),
-			p.map((e, t) => /* @__PURE__ */ (0, A.jsx)(N, {
+			p.map((e, t) => /* @__PURE__ */ (0, A.jsx)(M, {
 				label: `Week ${t + 1}`,
 				children: /* @__PURE__ */ (0, A.jsxs)("select", {
 					value: e ?? "",
@@ -8206,20 +8217,20 @@ var T = n(), gt = s(), _t = [
 					}, e.id))]
 				})
 			}, t)),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: a,
 				field: "slots"
 			}),
 			/* @__PURE__ */ (0, A.jsxs)("div", {
 				className: "form-row",
-				children: [/* @__PURE__ */ (0, A.jsx)(N, {
+				children: [/* @__PURE__ */ (0, A.jsx)(M, {
 					label: "Active from",
 					children: /* @__PURE__ */ (0, A.jsx)("input", {
 						type: "date",
 						value: h,
 						onChange: (e) => g(e.target.value)
 					})
-				}), /* @__PURE__ */ (0, A.jsx)(N, {
+				}), /* @__PURE__ */ (0, A.jsx)(M, {
 					label: "Active until (optional)",
 					children: /* @__PURE__ */ (0, A.jsx)("input", {
 						type: "date",
@@ -8228,19 +8239,19 @@ var T = n(), gt = s(), _t = [
 					})
 				})]
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: a,
 				field: "active_from"
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: a,
 				field: "active_until"
 			}),
-			/* @__PURE__ */ (0, A.jsx)(gn, {
+			/* @__PURE__ */ (0, A.jsx)(vn, {
 				error: a,
-				fields: jn
+				fields: Nn
 			}),
-			/* @__PURE__ */ (0, A.jsx)(An, {
+			/* @__PURE__ */ (0, A.jsx)(Mn, {
 				kind: "rotation",
 				draft: {
 					...y,
@@ -8248,7 +8259,7 @@ var T = n(), gt = s(), _t = [
 					id: e?.id
 				},
 				start: c,
-				weeks: Mn
+				weeks: Pn
 			}),
 			/* @__PURE__ */ (0, A.jsxs)("div", {
 				className: "actions",
@@ -8267,23 +8278,23 @@ var T = n(), gt = s(), _t = [
 			})
 		]
 	});
-}, In = ({ onClose: e }) => {
+}, Ln = ({ onClose: e }) => {
 	let { api: t, config: n, today: r } = O(), { error: i, busy: a, submit: o, setError: s } = Rt(), [c, l] = (0, T.useState)(2), [u, d] = (0, T.useState)("mon"), [f, p] = (0, T.useState)(n.shift_types[0]?.id), [m, h] = (0, T.useState)(r);
 	return /* @__PURE__ */ (0, A.jsxs)("div", {
 		className: "form",
 		children: [
 			/* @__PURE__ */ (0, A.jsxs)("div", {
 				className: "form-row",
-				children: [/* @__PURE__ */ (0, A.jsx)(N, {
+				children: [/* @__PURE__ */ (0, A.jsx)(M, {
 					label: "Every (weeks)",
 					children: /* @__PURE__ */ (0, A.jsx)("input", {
 						type: "number",
 						min: 1,
-						max: Nn,
+						max: Fn,
 						value: c,
-						onChange: (e) => l(Pn(Number(e.target.value)))
+						onChange: (e) => l(N(Number(e.target.value)))
 					})
-				}), /* @__PURE__ */ (0, A.jsx)(N, {
+				}), /* @__PURE__ */ (0, A.jsx)(M, {
 					label: "On",
 					children: /* @__PURE__ */ (0, A.jsx)("select", {
 						value: u,
@@ -8295,7 +8306,7 @@ var T = n(), gt = s(), _t = [
 					})
 				})]
 			}),
-			/* @__PURE__ */ (0, A.jsx)(N, {
+			/* @__PURE__ */ (0, A.jsx)(M, {
 				label: "Shift type",
 				children: /* @__PURE__ */ (0, A.jsx)("select", {
 					value: f ?? "",
@@ -8306,7 +8317,7 @@ var T = n(), gt = s(), _t = [
 					}, e.id))
 				})
 			}),
-			/* @__PURE__ */ (0, A.jsx)(N, {
+			/* @__PURE__ */ (0, A.jsx)(M, {
 				label: "Starting",
 				children: /* @__PURE__ */ (0, A.jsx)("input", {
 					type: "date",
@@ -8314,7 +8325,7 @@ var T = n(), gt = s(), _t = [
 					onChange: (e) => h(e.target.value)
 				})
 			}),
-			/* @__PURE__ */ (0, A.jsx)(gn, { error: i }),
+			/* @__PURE__ */ (0, A.jsx)(vn, { error: i }),
 			/* @__PURE__ */ (0, A.jsxs)("div", {
 				className: "actions",
 				children: [/* @__PURE__ */ (0, A.jsx)("button", {
@@ -8357,10 +8368,10 @@ var T = n(), gt = s(), _t = [
 			})
 		]
 	});
-}, Ln = () => {
+}, Rn = () => {
 	let { api: e, config: t } = O(), { error: n, busy: r, submit: i } = Rt(), [a, o] = (0, T.useState)(null), [s, c] = (0, T.useState)(!1), [l, u] = (0, T.useState)(null), d = Xt(t.rotations);
-	if (s) return /* @__PURE__ */ (0, A.jsx)(In, { onClose: () => c(!1) });
-	if (a) return /* @__PURE__ */ (0, A.jsx)(Fn, {
+	if (s) return /* @__PURE__ */ (0, A.jsx)(Ln, { onClose: () => c(!1) });
+	if (a) return /* @__PURE__ */ (0, A.jsx)(In, {
 		item: a === "new" ? null : a,
 		onClose: () => o(null)
 	});
@@ -8368,7 +8379,7 @@ var T = n(), gt = s(), _t = [
 		for (let r of Zt(d, t, n)) await e.update("rotation", r.id, { priority: r.priority });
 	});
 	return /* @__PURE__ */ (0, A.jsxs)(A.Fragment, { children: [
-		/* @__PURE__ */ (0, A.jsx)(gn, { error: n }),
+		/* @__PURE__ */ (0, A.jsx)(vn, { error: n }),
 		/* @__PURE__ */ (0, A.jsx)("ul", {
 			className: "list",
 			children: d.map((e, t) => /* @__PURE__ */ (0, A.jsxs)("li", { children: [
@@ -8381,14 +8392,14 @@ var T = n(), gt = s(), _t = [
 						children: [e.cycle_weeks, "-week cycle"]
 					})] })
 				}),
-				/* @__PURE__ */ (0, A.jsx)(pn, {
-					path: j.up,
+				/* @__PURE__ */ (0, A.jsx)(hn, {
+					path: pn.up,
 					label: "Higher priority",
 					disabled: r || t === 0,
 					onClick: () => f(e.id, -1)
 				}),
-				/* @__PURE__ */ (0, A.jsx)(pn, {
-					path: j.down,
+				/* @__PURE__ */ (0, A.jsx)(hn, {
+					path: pn.down,
 					label: "Lower priority",
 					disabled: r || t === d.length - 1,
 					onClick: () => f(e.id, 1)
@@ -8415,26 +8426,26 @@ var T = n(), gt = s(), _t = [
 				children: "Quick add: recurring shift"
 			})]
 		}),
-		l && /* @__PURE__ */ (0, A.jsx)(wn, {
+		l && /* @__PURE__ */ (0, A.jsx)(En, {
 			kind: "rotation",
 			item: l,
 			onClose: () => u(null)
 		})
 	] });
-}, Rn = {
+}, zn = {
 	name: "",
 	start: "09:00",
 	end: "17:00",
 	colour: "#2196f3",
 	notes: ""
-}, zn = [
+}, Bn = [
 	"name",
 	"start",
 	"end",
 	"colour"
-], Bn = ({ item: e, onClose: t }) => {
+], Vn = ({ item: e, onClose: t }) => {
 	let { api: n } = O(), { error: r, busy: i, submit: a } = Rt(), [o, s] = (0, T.useState)({
-		...Rn,
+		...zn,
 		...e
 	}), c = (e, t) => s((n) => ({
 		...n,
@@ -8443,21 +8454,21 @@ var T = n(), gt = s(), _t = [
 	return /* @__PURE__ */ (0, A.jsxs)("div", {
 		className: "form",
 		children: [
-			/* @__PURE__ */ (0, A.jsx)(N, {
+			/* @__PURE__ */ (0, A.jsx)(M, {
 				label: "Name",
 				children: /* @__PURE__ */ (0, A.jsx)("input", {
 					value: o.name,
 					onChange: (e) => c("name", e.target.value)
 				})
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: r,
 				field: "name"
 			}),
 			/* @__PURE__ */ (0, A.jsxs)("div", {
 				className: "form-row",
 				children: [
-					/* @__PURE__ */ (0, A.jsx)(N, {
+					/* @__PURE__ */ (0, A.jsx)(M, {
 						label: "Start",
 						children: /* @__PURE__ */ (0, A.jsx)("input", {
 							type: "time",
@@ -8465,7 +8476,7 @@ var T = n(), gt = s(), _t = [
 							onChange: (e) => c("start", e.target.value)
 						})
 					}),
-					/* @__PURE__ */ (0, A.jsx)(N, {
+					/* @__PURE__ */ (0, A.jsx)(M, {
 						label: D(o.start, o.end) ? "End (+1)" : "End",
 						children: /* @__PURE__ */ (0, A.jsx)("input", {
 							type: "time",
@@ -8473,7 +8484,7 @@ var T = n(), gt = s(), _t = [
 							onChange: (e) => c("end", e.target.value)
 						})
 					}),
-					/* @__PURE__ */ (0, A.jsx)(N, {
+					/* @__PURE__ */ (0, A.jsx)(M, {
 						label: "Colour",
 						children: /* @__PURE__ */ (0, A.jsx)("input", {
 							type: "color",
@@ -8483,28 +8494,28 @@ var T = n(), gt = s(), _t = [
 					})
 				]
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: r,
 				field: "start"
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: r,
 				field: "end"
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: r,
 				field: "colour"
 			}),
-			/* @__PURE__ */ (0, A.jsx)(N, {
+			/* @__PURE__ */ (0, A.jsx)(M, {
 				label: "Notes",
 				children: /* @__PURE__ */ (0, A.jsx)("input", {
 					value: o.notes,
 					onChange: (e) => c("notes", e.target.value)
 				})
 			}),
-			/* @__PURE__ */ (0, A.jsx)(gn, {
+			/* @__PURE__ */ (0, A.jsx)(vn, {
 				error: r,
-				fields: zn
+				fields: Bn
 			}),
 			/* @__PURE__ */ (0, A.jsxs)("div", {
 				className: "actions",
@@ -8532,9 +8543,9 @@ var T = n(), gt = s(), _t = [
 			})
 		]
 	});
-}, Vn = () => {
+}, Hn = () => {
 	let { config: e } = O(), [t, n] = (0, T.useState)(null), [r, i] = (0, T.useState)(null);
-	return t ? /* @__PURE__ */ (0, A.jsx)(Bn, {
+	return t ? /* @__PURE__ */ (0, A.jsx)(Vn, {
 		item: t === "new" ? null : t,
 		onClose: () => n(null)
 	}) : /* @__PURE__ */ (0, A.jsxs)(A.Fragment, { children: [
@@ -8570,28 +8581,28 @@ var T = n(), gt = s(), _t = [
 			onClick: () => n("new"),
 			children: "Add shift type"
 		}),
-		r && /* @__PURE__ */ (0, A.jsx)(wn, {
+		r && /* @__PURE__ */ (0, A.jsx)(En, {
 			kind: "shift_type",
 			item: r,
 			replacements: e.shift_types.filter((e) => e.id !== r.id),
 			onClose: () => i(null)
 		})
 	] });
-}, Hn = [
+}, Un = [
 	"name",
 	"start_date",
 	"end_date",
 	"mode",
 	"pattern_id",
 	"days"
-], Un = 8, Wn = { type: "off" }, Gn = ({ days: e, onChange: t }) => {
+], Wn = 8, Gn = { type: "off" }, Kn = ({ days: e, onChange: t }) => {
 	let { config: n } = O();
 	return /* @__PURE__ */ (0, A.jsx)("div", {
 		className: "days",
 		children: _t.map((r) => {
 			let i = e[r], a = (n) => {
 				let i = { ...e };
-				n ? i[r] = Wn : delete i[r], t(i);
+				n ? i[r] = Gn : delete i[r], t(i);
 			};
 			return /* @__PURE__ */ (0, A.jsxs)("div", {
 				className: "days-row wide",
@@ -8602,7 +8613,7 @@ var T = n(), gt = s(), _t = [
 						checked: i !== void 0,
 						onChange: (e) => a(e.target.checked)
 					}), qt(r).slice(0, 3)]
-				}), i ? /* @__PURE__ */ (0, A.jsx)(dn, {
+				}), i ? /* @__PURE__ */ (0, A.jsx)(fn, {
 					value: i,
 					shiftTypes: n.shift_types,
 					onChange: (n) => t({
@@ -8616,7 +8627,7 @@ var T = n(), gt = s(), _t = [
 			}, r);
 		})
 	});
-}, Kn = ({ item: e, onClose: t }) => {
+}, qn = ({ item: e, onClose: t }) => {
 	let { api: n, config: r, today: i } = O(), { error: a, busy: o, submit: s } = Rt(), [c, l] = (0, T.useState)(e?.name ?? ""), [u, d] = (0, T.useState)(e?.start_date ?? i), [f, p] = (0, T.useState)(e?.end_date ?? i), [m, h] = (0, T.useState)(e?.mode ?? "pattern"), [g, _] = (0, T.useState)(e?.pattern_id ?? r.patterns[0]?.id ?? ""), [v, y] = (0, T.useState)(e?.days ?? {}), b = {
 		name: c,
 		start_date: u,
@@ -8625,31 +8636,31 @@ var T = n(), gt = s(), _t = [
 		...m === "pattern" ? { pattern_id: g } : { days: v }
 	}, ee = async () => {
 		await s(() => e ? n.update("variation", e.id, b) : n.create("variation", b)) && t();
-	}, te = xt(u || i), x = f ? Math.min(Un, Math.max(1, se(Xe(f), Xe(te), { weekStartsOn: 1 }) + 2)) : 1;
+	}, te = xt(u || i), x = f ? Math.min(Wn, Math.max(1, se(Xe(f), Xe(te), { weekStartsOn: 1 }) + 2)) : 1;
 	return /* @__PURE__ */ (0, A.jsxs)("div", {
 		className: "form",
 		children: [
-			/* @__PURE__ */ (0, A.jsx)(N, {
+			/* @__PURE__ */ (0, A.jsx)(M, {
 				label: "Name",
 				children: /* @__PURE__ */ (0, A.jsx)("input", {
 					value: c,
 					onChange: (e) => l(e.target.value)
 				})
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: a,
 				field: "name"
 			}),
 			/* @__PURE__ */ (0, A.jsxs)("div", {
 				className: "form-row",
-				children: [/* @__PURE__ */ (0, A.jsx)(N, {
+				children: [/* @__PURE__ */ (0, A.jsx)(M, {
 					label: "From",
 					children: /* @__PURE__ */ (0, A.jsx)("input", {
 						type: "date",
 						value: u,
 						onChange: (e) => d(e.target.value)
 					})
-				}), /* @__PURE__ */ (0, A.jsx)(N, {
+				}), /* @__PURE__ */ (0, A.jsx)(M, {
 					label: "To",
 					children: /* @__PURE__ */ (0, A.jsx)("input", {
 						type: "date",
@@ -8658,11 +8669,11 @@ var T = n(), gt = s(), _t = [
 					})
 				})]
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: a,
 				field: "start_date"
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: a,
 				field: "end_date"
 			}),
@@ -8680,7 +8691,7 @@ var T = n(), gt = s(), _t = [
 					children: "Edit weekdays"
 				})]
 			}),
-			m === "pattern" ? /* @__PURE__ */ (0, A.jsx)(N, {
+			m === "pattern" ? /* @__PURE__ */ (0, A.jsx)(M, {
 				label: "Pattern",
 				children: /* @__PURE__ */ (0, A.jsx)("select", {
 					value: g,
@@ -8690,23 +8701,23 @@ var T = n(), gt = s(), _t = [
 						children: e.name
 					}, e.id))
 				})
-			}) : /* @__PURE__ */ (0, A.jsx)(Gn, {
+			}) : /* @__PURE__ */ (0, A.jsx)(Kn, {
 				days: v,
 				onChange: y
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: a,
 				field: "pattern_id"
 			}),
-			/* @__PURE__ */ (0, A.jsx)(M, {
+			/* @__PURE__ */ (0, A.jsx)(j, {
 				error: a,
 				field: "days"
 			}),
-			/* @__PURE__ */ (0, A.jsx)(gn, {
+			/* @__PURE__ */ (0, A.jsx)(vn, {
 				error: a,
-				fields: Hn
+				fields: Un
 			}),
-			/* @__PURE__ */ (0, A.jsx)(An, {
+			/* @__PURE__ */ (0, A.jsx)(Mn, {
 				kind: "variation",
 				draft: {
 					...b,
@@ -8733,24 +8744,24 @@ var T = n(), gt = s(), _t = [
 			})
 		]
 	});
-}, qn = [
+}, Jn = [
 	{
 		title: "Shift types",
-		component: Vn
+		component: Hn
 	},
 	{
 		title: "Week patterns",
-		component: On
+		component: An
 	},
 	{
 		title: "Rotations",
-		component: Ln
+		component: Rn
 	},
 	{
 		title: "Variations",
 		component: () => {
 			let { config: e, today: t } = O(), [n, r] = (0, T.useState)(null), [i, a] = (0, T.useState)(null);
-			if (n) return /* @__PURE__ */ (0, A.jsx)(Kn, {
+			if (n) return /* @__PURE__ */ (0, A.jsx)(qn, {
 				item: n === "new" ? null : n,
 				onClose: () => r(null)
 			});
@@ -8791,7 +8802,7 @@ var T = n(), gt = s(), _t = [
 					onClick: () => r("new"),
 					children: "Add variation"
 				}),
-				i && /* @__PURE__ */ (0, A.jsx)(wn, {
+				i && /* @__PURE__ */ (0, A.jsx)(En, {
 					kind: "variation",
 					item: i,
 					onClose: () => a(null)
@@ -8801,15 +8812,15 @@ var T = n(), gt = s(), _t = [
 	},
 	{
 		title: "Exceptions",
-		component: Cn
+		component: Tn
 	},
 	{
 		title: "Backup",
-		component: xn,
+		component: Cn,
 		readOnly: !0
 	}
-], Jn = () => {
-	let { canEdit: e } = O(), [t, n] = (0, T.useState)(null), r = qn.filter((t) => e || t.readOnly);
+], Yn = () => {
+	let { canEdit: e } = O(), [t, n] = (0, T.useState)(null), r = Jn.filter((t) => e || t.readOnly);
 	if (t) {
 		let e = t.component;
 		return /* @__PURE__ */ (0, A.jsxs)("main", {
@@ -8819,7 +8830,7 @@ var T = n(), gt = s(), _t = [
 					type: "button",
 					className: "breadcrumb",
 					onClick: () => n(null),
-					children: [/* @__PURE__ */ (0, A.jsx)(fn, { path: j.left }), " Settings"]
+					children: [/* @__PURE__ */ (0, A.jsx)(mn, { path: pn.left }), " Settings"]
 				}),
 				/* @__PURE__ */ (0, A.jsx)("h3", {
 					className: "screen-title",
@@ -8840,18 +8851,18 @@ var T = n(), gt = s(), _t = [
 				type: "button",
 				className: "list-main",
 				onClick: () => n(e),
-				children: [/* @__PURE__ */ (0, A.jsx)("span", { children: e.title }), /* @__PURE__ */ (0, A.jsx)(fn, { path: j.right })]
+				children: [/* @__PURE__ */ (0, A.jsx)("span", { children: e.title }), /* @__PURE__ */ (0, A.jsx)(mn, { path: pn.right })]
 			}) }, e.title))
 		})]
 	});
-}, Yn = 6e4, Xn = (e) => {
+}, Xn = 6e4, Zn = (e) => {
 	let [t, n] = (0, T.useState)(() => Et(e));
 	return (0, T.useEffect)(() => {
-		let t = setInterval(() => n(Et(e)), Yn);
+		let t = setInterval(() => n(Et(e)), Xn);
 		return () => clearInterval(t);
 	}, [e]), t;
-}, Zn = ({ narrow: e }) => {
-	let t = Mt(), { rosters: n, error: r } = Pt(), [i, a] = (0, T.useState)(null), [o, s] = (0, T.useState)(!1), c = (0, T.useRef)(null), l = Xn(t.config.time_zone), u = n?.find((e) => e.entry_id === i) ?? n?.[0], d = u?.entry_id ?? null, { api: f, config: p, error: m } = Ft(d), h = u?.can_edit ?? !1, g = (0, T.useMemo)(() => f && p ? {
+}, Qn = ({ narrow: e }) => {
+	let t = Mt(), { rosters: n, error: r } = Pt(), [i, a] = (0, T.useState)(null), [o, s] = (0, T.useState)(!1), c = (0, T.useRef)(null), l = Zn(t.config.time_zone), u = n?.find((e) => e.entry_id === i) ?? n?.[0], d = u?.entry_id ?? null, { api: f, config: p, error: m } = Ft(d), h = u?.can_edit ?? !1, g = (0, T.useMemo)(() => f && p ? {
 		api: f,
 		config: p,
 		canEdit: h,
@@ -8869,12 +8880,12 @@ var T = n(), gt = s(), _t = [
 			/* @__PURE__ */ (0, A.jsxs)("header", {
 				className: "header",
 				children: [
-					o ? /* @__PURE__ */ (0, A.jsx)(pn, {
-						path: j.back,
+					o ? /* @__PURE__ */ (0, A.jsx)(hn, {
+						path: pn.back,
 						label: "Back",
 						onClick: () => s(!1)
-					}) : e && /* @__PURE__ */ (0, A.jsx)(pn, {
-						path: j.menu,
+					}) : e && /* @__PURE__ */ (0, A.jsx)(hn, {
+						path: pn.menu,
 						label: "Menu",
 						onClick: () => c.current?.dispatchEvent(new CustomEvent("hass-toggle-menu", {
 							bubbles: !0,
@@ -8891,8 +8902,8 @@ var T = n(), gt = s(), _t = [
 							children: e.title
 						}, e.entry_id))
 					}) : /* @__PURE__ */ (0, A.jsx)("h1", { children: u?.title ?? "Roster" }),
-					!o && g && /* @__PURE__ */ (0, A.jsx)(pn, {
-						path: j.gear,
+					!o && g && /* @__PURE__ */ (0, A.jsx)(hn, {
+						path: pn.gear,
 						label: "Settings",
 						onClick: () => s(!0)
 					})
@@ -8908,11 +8919,11 @@ var T = n(), gt = s(), _t = [
 			}),
 			g && /* @__PURE__ */ (0, A.jsx)(Nt.Provider, {
 				value: g,
-				children: o ? /* @__PURE__ */ (0, A.jsx)(Jn, {}) : /* @__PURE__ */ (0, A.jsx)(bn, { narrow: e })
+				children: o ? /* @__PURE__ */ (0, A.jsx)(Yn, {}) : /* @__PURE__ */ (0, A.jsx)(Sn, { narrow: e })
 			})
 		]
 	});
-}, Qn = ":host{height:100%;color:var(--primary-text-color);background:var(--primary-background-color);font-family:var(--paper-font-body1_-_font-family,Roboto, sans-serif);-webkit-text-size-adjust:100%;font-size:15px;display:block}*{box-sizing:border-box}h1,h2,h3,p{margin:0}.app{min-height:100vh}.muted{color:var(--secondary-text-color)}.error{color:var(--error-color,#db4437);font-size:13px}.warning{color:var(--warning-color,#ffa600);font-size:13px}.header{min-height:56px;padding:0 8px;padding-top:env(safe-area-inset-top);color:var(--app-header-text-color,#fff);background:var(--app-header-background-color,var(--primary-color));align-items:center;gap:4px;display:flex}.header h1,.roster-switcher{text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;margin-left:8px;font-size:20px;font-weight:400;overflow:hidden}.header select.roster-switcher{width:auto;color:inherit;background:0 0;border:none}.header select.roster-switcher option{color:var(--primary-text-color);background:var(--card-background-color)}.content{max-width:760px;padding:12px 12px calc(24px + env(safe-area-inset-bottom));margin:0 auto}.summary{margin-bottom:8px;font-weight:500}.toolbar{flex-wrap:wrap;align-items:center;gap:4px;margin-bottom:8px;display:flex}.toolbar-title{text-align:center;min-width:118px}.icon-button{width:44px;height:44px;color:inherit;cursor:pointer;background:0 0;border:none;border-radius:50%;justify-content:center;align-items:center;padding:0;display:inline-flex}.icon-button:disabled{opacity:.3;cursor:default}.button{min-height:44px;color:var(--primary-color);font:inherit;border:1px solid var(--divider-color);cursor:pointer;background:0 0;border-radius:8px;padding:0 16px;font-weight:500}.button.small{min-height:36px;padding:0 10px}.button.primary{color:var(--text-primary-color,#fff);background:var(--primary-color);border-color:var(--primary-color)}.button.danger{color:var(--error-color,#db4437)}.button:disabled{opacity:.5}.segmented{border:1px solid var(--divider-color);border-radius:8px;margin-left:auto;display:inline-flex;overflow:hidden}.segmented button{min-height:36px;color:inherit;font:inherit;cursor:pointer;background:0 0;border:none;padding:0 10px}.segmented .selected{color:var(--text-primary-color,#fff);background:var(--primary-color)}.week{flex-direction:column;gap:6px;display:flex}.week-row{width:100%;min-height:60px;color:inherit;font:inherit;text-align:left;background:var(--card-background-color);cursor:pointer;border:1px solid #0000;border-radius:10px;align-items:center;gap:10px;padding:8px 12px;display:flex}.today{border-color:var(--primary-color)!important}.in-variation{box-shadow:inset 0 0 0 1px var(--divider-color);outline:1px dashed var(--secondary-text-color);outline-offset:-3px}.week-date{flex-direction:column;align-items:center;width:36px;display:flex}.colour-bar{border-radius:2px;flex:none;width:4px;height:36px;display:inline-block}.week-shift{flex-direction:column;flex:1;min-width:0;display:flex}.marker.plus{color:var(--primary-color);font-weight:700}.marker.dot{background:var(--primary-color);border-radius:50%;width:7px;height:7px;display:inline-block}.month{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;display:grid}.month-heading{text-align:center;padding:4px 0;font-size:12px}.month-cell{min-height:58px;color:inherit;font:inherit;background:var(--card-background-color);cursor:pointer;border:1px solid #0000;border-radius:8px;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;display:flex}.month-cell.outside{opacity:.45}.month-number{align-items:center;gap:3px;font-size:13px;display:inline-flex}.month-dot{border-radius:50%;width:10px;height:10px}.month-time{border-left:3px solid;padding-left:4px;font-size:12px}.sheet-backdrop{z-index:10;background:#00000073;justify-content:center;align-items:flex-end;display:flex;position:fixed;inset:0}.sheet{width:100%;max-width:520px;max-height:85vh;padding:18px 16px calc(18px + env(safe-area-inset-bottom));background:var(--card-background-color);border-radius:16px 16px 0 0;flex-direction:column;gap:12px;display:flex;overflow-y:auto}.sheet h2{font-size:18px;font-weight:500}.sheet-shift{align-items:center;gap:8px;display:flex}.actions{flex-wrap:wrap;gap:8px;display:flex}.field{color:var(--secondary-text-color);flex-direction:column;gap:4px;font-size:13px;display:flex}input,select{width:100%;min-height:44px;color:var(--primary-text-color);font:inherit;background:var(--secondary-background-color,transparent);border:1px solid var(--divider-color);border-radius:8px;padding:0 10px;font-size:16px}input[type=color]{padding:4px}input[type=checkbox]{width:auto;min-height:0}.assignment{flex-direction:column;gap:6px;min-width:0;display:flex}.assignment-times{align-items:center;gap:6px;display:flex}.assignment-times input{min-width:0}.breadcrumb{min-height:44px;color:var(--primary-color);font:inherit;cursor:pointer;background:0 0;border:none;align-items:center;padding:0;display:inline-flex}.screen-title{margin-bottom:12px}.list{flex-direction:column;gap:6px;margin:0 0 12px;padding:0;list-style:none;display:flex}.list li{background:var(--card-background-color);border-radius:10px;align-items:center;gap:4px;padding-right:8px;display:flex}.list-main{min-width:0;min-height:52px;color:inherit;font:inherit;text-align:left;cursor:pointer;background:0 0;border:none;flex:1;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;display:flex}.list-main>span:last-child:not(.swatch){flex:1;min-width:0}.list-detail{text-overflow:ellipsis;white-space:nowrap;font-size:13px;display:block;overflow:hidden}.swatch{border-radius:50%;flex:none;width:18px;height:18px}.form{flex-direction:column;gap:10px;display:flex}.form-row{gap:8px;display:flex}.form-row .field{flex:1;min-width:0}.days{flex-direction:column;gap:6px;display:flex}.days-row{grid-template-columns:40px minmax(0,1fr);align-items:start;gap:8px;display:grid}.days-row>span{padding-top:12px}.preview{flex-direction:column;gap:3px;font-size:12px;display:flex}.preview-row{grid-template-columns:48px repeat(7,minmax(0,1fr));align-items:center;gap:2px;display:grid}.preview-cell{text-align:center;background:var(--card-background-color);border-bottom:2px solid #0000;padding:3px 0}.group-title{margin:8px 0 6px;font-size:13px;font-weight:500}.days-row.wide{grid-template-columns:72px minmax(0,1fr)}.check{align-items:center;gap:6px;min-height:44px;display:flex}.days-unchanged{padding-top:12px}.segmented.fit{align-self:flex-start;margin-left:0}.past{opacity:.75;margin-top:8px}.export{width:100%;color:var(--primary-text-color);background:var(--secondary-background-color,transparent);border:1px solid var(--divider-color);border-radius:8px;padding:8px;font-family:monospace;font-size:12px}.file-button{justify-content:center;align-items:center;display:inline-flex}.file-button input{display:none}", $n = class extends HTMLElement {
+}, $n = ":host{height:100%;color:var(--primary-text-color);background:var(--primary-background-color);font-family:var(--paper-font-body1_-_font-family,Roboto, sans-serif);-webkit-text-size-adjust:100%;font-size:15px;display:block}*{box-sizing:border-box}h1,h2,h3,p{margin:0}.app{min-height:100vh}.muted{color:var(--secondary-text-color)}.error{color:var(--error-color,#db4437);font-size:13px}.warning{color:var(--warning-color,#ffa600);font-size:13px}.header{min-height:56px;padding:0 8px;padding-top:env(safe-area-inset-top);color:var(--app-header-text-color,#fff);background:var(--app-header-background-color,var(--primary-color));align-items:center;gap:4px;display:flex}.header h1,.roster-switcher{text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;margin-left:8px;font-size:20px;font-weight:400;overflow:hidden}.header select.roster-switcher{width:auto;color:inherit;background:0 0;border:none}.header select.roster-switcher option{color:var(--primary-text-color);background:var(--card-background-color)}.content{max-width:760px;padding:12px 12px calc(24px + env(safe-area-inset-bottom));margin:0 auto}.summary{margin-bottom:8px;font-weight:500}.toolbar{flex-wrap:wrap;align-items:center;gap:4px;margin-bottom:8px;display:flex}.toolbar-title{text-align:center;min-width:118px}.icon-button{width:44px;height:44px;color:inherit;cursor:pointer;background:0 0;border:none;border-radius:50%;justify-content:center;align-items:center;padding:0;display:inline-flex}.icon-button:disabled{opacity:.3;cursor:default}.button{min-height:44px;color:var(--primary-color);font:inherit;border:1px solid var(--divider-color);cursor:pointer;background:0 0;border-radius:8px;padding:0 16px;font-weight:500}.button.small{min-height:36px;padding:0 10px}.button.primary{color:var(--text-primary-color,#fff);background:var(--primary-color);border-color:var(--primary-color)}.button.danger{color:var(--error-color,#db4437)}.button:disabled{opacity:.5}.segmented{border:1px solid var(--divider-color);border-radius:8px;margin-left:auto;display:inline-flex;overflow:hidden}.segmented button{min-height:36px;color:inherit;font:inherit;cursor:pointer;background:0 0;border:none;padding:0 10px}.segmented .selected{color:var(--text-primary-color,#fff);background:var(--primary-color)}.week{flex-direction:column;gap:6px;display:flex}.week-row{width:100%;min-height:60px;color:inherit;font:inherit;text-align:left;background:var(--card-background-color);cursor:pointer;border:1px solid #0000;border-radius:10px;align-items:center;gap:10px;padding:8px 12px;display:flex}.today{border-color:var(--primary-color)!important}.in-variation{box-shadow:inset 0 0 0 1px var(--divider-color);outline:1px dashed var(--secondary-text-color);outline-offset:-3px}.week-date{flex-direction:column;align-items:center;width:36px;display:flex}.colour-bar{border-radius:2px;flex:none;width:4px;height:36px;display:inline-block}.week-shift{flex-direction:column;flex:1;min-width:0;display:flex}.marker.plus{color:var(--primary-color);font-weight:700}.marker.dot{background:var(--primary-color);border-radius:50%;width:7px;height:7px;display:inline-block}.marker.ring{box-sizing:border-box;border:1.5px solid var(--primary-color);border-radius:50%;width:7px;height:7px;display:inline-block}.month{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;display:grid}.month-heading{text-align:center;padding:4px 0;font-size:12px}.month-cell{min-height:58px;color:inherit;font:inherit;background:var(--card-background-color);cursor:pointer;border:1px solid #0000;border-radius:8px;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;display:flex}.month-cell.outside{opacity:.45}.month-number{align-items:center;gap:3px;font-size:13px;display:inline-flex}.month-dot{border-radius:50%;width:10px;height:10px}.month-time{border-left:3px solid;padding-left:4px;font-size:12px}.sheet-backdrop{z-index:10;background:#00000073;justify-content:center;align-items:flex-end;display:flex;position:fixed;inset:0}.sheet{width:100%;max-width:520px;max-height:85vh;padding:18px 16px calc(18px + env(safe-area-inset-bottom));background:var(--card-background-color);border-radius:16px 16px 0 0;flex-direction:column;gap:12px;display:flex;overflow-y:auto}.sheet h2{font-size:18px;font-weight:500}.sheet-shift{align-items:center;gap:8px;display:flex}.actions{flex-wrap:wrap;gap:8px;display:flex}.field{color:var(--secondary-text-color);flex-direction:column;gap:4px;font-size:13px;display:flex}input,select{width:100%;min-height:44px;color:var(--primary-text-color);font:inherit;background:var(--secondary-background-color,transparent);border:1px solid var(--divider-color);border-radius:8px;padding:0 10px;font-size:16px}input[type=color]{padding:4px}input[type=checkbox]{width:auto;min-height:0}.assignment{flex-direction:column;gap:6px;min-width:0;display:flex}.assignment-times{align-items:center;gap:6px;display:flex}.assignment-times input{min-width:0}.breadcrumb{min-height:44px;color:var(--primary-color);font:inherit;cursor:pointer;background:0 0;border:none;align-items:center;padding:0;display:inline-flex}.screen-title{margin-bottom:12px}.list{flex-direction:column;gap:6px;margin:0 0 12px;padding:0;list-style:none;display:flex}.list li{background:var(--card-background-color);border-radius:10px;align-items:center;gap:4px;padding-right:8px;display:flex}.list-main{min-width:0;min-height:52px;color:inherit;font:inherit;text-align:left;cursor:pointer;background:0 0;border:none;flex:1;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;display:flex}.list-main>span:last-child:not(.swatch){flex:1;min-width:0}.list-detail{text-overflow:ellipsis;white-space:nowrap;font-size:13px;display:block;overflow:hidden}.swatch{border-radius:50%;flex:none;width:18px;height:18px}.form{flex-direction:column;gap:10px;display:flex}.form-row{gap:8px;display:flex}.form-row .field{flex:1;min-width:0}.days{flex-direction:column;gap:6px;display:flex}.days-row{grid-template-columns:40px minmax(0,1fr);align-items:start;gap:8px;display:grid}.days-row>span{padding-top:12px}.preview{flex-direction:column;gap:3px;font-size:12px;display:flex}.preview-row{grid-template-columns:48px repeat(7,minmax(0,1fr));align-items:center;gap:2px;display:grid}.preview-cell{text-align:center;background:var(--card-background-color);border-bottom:2px solid #0000;padding:3px 0}.group-title{margin:8px 0 6px;font-size:13px;font-weight:500}.days-row.wide{grid-template-columns:72px minmax(0,1fr)}.check{align-items:center;gap:6px;min-height:44px;display:flex}.days-unchanged{padding-top:12px}.segmented.fit{align-self:flex-start;margin-left:0}.past{opacity:.75;margin-top:8px}.export{width:100%;color:var(--primary-text-color);background:var(--secondary-background-color,transparent);border:1px solid var(--divider-color);border-radius:8px;padding:8px;font-family:monospace;font-size:12px}.file-button{justify-content:center;align-items:center;display:inline-flex}.file-button input{display:none}", er = class extends HTMLElement {
 	root;
 	currentHass;
 	currentNarrow = !1;
@@ -8927,7 +8938,7 @@ var T = n(), gt = s(), _t = [
 		let e = this.shadowRoot?.querySelector("div");
 		if (!e) {
 			let t = this.attachShadow({ mode: "open" }), n = document.createElement("style");
-			n.textContent = Qn, e = document.createElement("div"), t.append(n, e);
+			n.textContent = $n, e = document.createElement("div"), t.append(n, e);
 		}
 		this.root ??= (0, gt.createRoot)(e), this.render();
 	}
@@ -8937,8 +8948,8 @@ var T = n(), gt = s(), _t = [
 	render() {
 		this.root && this.currentHass && this.root.render(/* @__PURE__ */ (0, A.jsx)(jt.Provider, {
 			value: this.currentHass,
-			children: /* @__PURE__ */ (0, A.jsx)(Zn, { narrow: this.currentNarrow })
+			children: /* @__PURE__ */ (0, A.jsx)(Qn, { narrow: this.currentNarrow })
 		}));
 	}
 };
-customElements.get("roster-planner-panel") || customElements.define("roster-planner-panel", $n);
+customElements.get("roster-planner-panel") || customElements.define("roster-planner-panel", er);

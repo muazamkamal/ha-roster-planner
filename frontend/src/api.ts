@@ -67,7 +67,8 @@ export class RosterApi {
     });
   }
 
-  setException(date: string, assignment: DayAssignment, note?: string) {
+  /** Pass a null assignment to keep the rostered shift and only set the note. */
+  setException(date: string, assignment: DayAssignment | null, note?: string) {
     return this.send<RosterException>("exception/set", {
       date,
       assignment,

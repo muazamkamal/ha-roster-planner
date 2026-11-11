@@ -266,6 +266,44 @@ def test_off_exception_cancels_and_clearing_restores():
     assert title(ANCHOR, data) == "Open"
 
 
+def test_note_only_exception_follows_the_roster():
+    data = build(
+        [MONDAY_ONLY, TUESDAY_ONLY],
+        [rotation(["mon"])],
+        exceptions=[
+            {"date": "2026-11-16", "note": "Bring keys"},
+            {"date": "2026-11-17", "note": "Dentist"},
+        ],
+    )
+    resolved = engine.resolve(ANCHOR, data, TZ)
+    assert (resolved.title, resolved.source, resolved.flag, resolved.week) == (
+        "Open",
+        "rotation",
+        None,
+        1,
+    )
+    assert resolved.note == "Bring keys"
+    # On a day off the note stays in the exception but there is no shift.
+    detail = engine.day_detail(date(2026, 11, 17), data, TZ)
+    assert detail.shift is None
+    assert detail.exception.note == "Dentist"
+    # A later rule change still applies to the noted day.
+    data.rotations["r1"].slots = ["tue"]
+    assert title(ANCHOR, data) is None
+    assert title(date(2026, 11, 17), data) == "Close"
+
+
+def test_note_only_day_detail_keeps_base_without_note():
+    data = build(
+        [MONDAY_ONLY],
+        [rotation(["mon"])],
+        exceptions=[{"date": "2026-11-16", "note": "Bring keys"}],
+    )
+    detail = engine.day_detail(ANCHOR, data, TZ)
+    assert detail.shift.note == "Bring keys"
+    assert detail.base.note is None
+
+
 def night_data():
     return build(
         [{"id": "n", "name": "N", "days": {"mon": shift("night")}}],

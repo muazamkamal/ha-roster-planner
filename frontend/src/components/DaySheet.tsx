@@ -35,10 +35,24 @@ export const DaySheet = ({
   );
   const actions = actionsFor(day);
   const origin = originLine(day);
+  const savedNote = day.exception?.note ?? "";
+  const noteChanged = note.trim() !== savedNote;
 
   const run = async (action: () => Promise<unknown>) => {
     if (await submit(action)) onClose();
   };
+
+  /** Keep the rostered shift, with the note if there is one. */
+  const followRoster = () =>
+    note.trim()
+      ? api.setException(day.date, null, note)
+      : api.clearException(day.date);
+
+  /** Save the note alone, leaving any change to the day as it is. */
+  const saveNote = () =>
+    day.exception?.assignment
+      ? api.setException(day.date, day.exception.assignment, note)
+      : followRoster();
 
   return (
     <Sheet title={formatDay(day.date, "EEEE d MMMM")} onClose={onClose}>
@@ -101,6 +115,16 @@ export const DaySheet = ({
             </>
           ) : (
             <>
+              {noteChanged && (
+                <button
+                  type="button"
+                  className="button primary"
+                  disabled={busy}
+                  onClick={() => run(saveNote)}
+                >
+                  Save note
+                </button>
+              )}
               {actions.change && (
                 <button
                   type="button"
@@ -136,7 +160,7 @@ export const DaySheet = ({
                   type="button"
                   className="button"
                   disabled={busy}
-                  onClick={() => run(() => api.clearException(day.date))}
+                  onClick={() => run(followRoster)}
                 >
                   Reset to roster
                 </button>

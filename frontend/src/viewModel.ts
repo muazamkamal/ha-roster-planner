@@ -25,10 +25,12 @@ export const timeRange = (shift: Resolved): string => {
   return `${clockOf(shift.start)}–${clockOf(shift.end)}${suffix}`;
 };
 
-export type Marker = "extra" | "changed" | null;
+export type Marker = "extra" | "changed" | "note" | null;
 
-/** Small marker for a day: "+" for an extra shift, a dot for any other change. */
+/** Small marker for a day: "+" for an extra shift, a dot for any other change,
+ * a ring for a note on a day that still follows the roster. */
 export const markerOf = (day: DayDetail): Marker => {
+  if (day.exception && !day.exception.assignment) return "note";
   if (day.shift?.flag === "extra") return "extra";
   if (day.exception && (day.shift || day.base)) return "changed";
   return null;
@@ -61,7 +63,8 @@ export const actionsFor = (day: DayDetail): DayActions => ({
   change: day.shift !== null,
   extra: day.shift === null,
   off: day.shift !== null,
-  reset: day.exception !== null,
+  // A note on its own changes nothing, so there is nothing to reset.
+  reset: Boolean(day.exception?.assignment),
 });
 
 /** One muted line saying where the day's result came from. */
@@ -192,6 +195,16 @@ export const groupVariations = (variations: Variation[], today: string) => {
     upcoming: sorted.filter((item) => item.start_date > today),
     past: sorted.filter((item) => item.end_date < today).reverse(),
   };
+};
+
+/** One line for an exception in the list: the change, then any note. */
+export const describeException = (
+  exception: RosterException,
+  shiftTypes: ShiftType[],
+): string => {
+  if (!exception.assignment) return `Note · ${exception.note ?? ""}`;
+  const change = describeAssignment(exception.assignment, shiftTypes);
+  return exception.note ? `${change} · ${exception.note}` : change;
 };
 
 /** Upcoming exceptions soonest first; past ones most recent first. */

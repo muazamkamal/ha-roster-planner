@@ -413,6 +413,74 @@ async def test_update_event_moving_date_cancels_old_day(hass: HomeAssistant, ent
     assert [e["start"][:10] for e in found] == ["2026-11-17"]
 
 
+async def test_set_exception_with_only_a_note(hass: HomeAssistant, entry):
+    await add_roster(entry, {"mon": "open"})
+    await hass.services.async_call(
+        DOMAIN,
+        "set_exception",
+        {"entity_id": ENTITY, "date": MONDAY, "note": "Bring keys"},
+        blocking=True,
+    )
+    found = await events(hass, local(2026, 11, 16), local(2026, 11, 17))
+    assert found[0]["summary"] == "Open"
+    assert found[0]["description"] == "Main roster · Week 1\nBring keys"
+    assert entry.runtime_data.data.exceptions[date(2026, 11, 16)].assignment is None
+
+
+async def test_update_event_description_only_keeps_roster(hass: HomeAssistant, entry):
+    await add_roster(entry, {"mon": "open"})
+    entity = calendar_entity(hass)
+    unchanged = {
+        "dtstart": local(2026, 11, 16, 7),
+        "dtend": local(2026, 11, 16, 15, 30),
+        "summary": "Open",
+    }
+    # Saving the event as sent, generated origin line and all, changes nothing.
+    await entity.async_update_event(
+        uid(entry, MONDAY), {**unchanged, "description": "Main roster · Week 1"}
+    )
+    assert not entry.runtime_data.data.exceptions
+    await entity.async_update_event(
+        uid(entry, MONDAY),
+        {**unchanged, "description": "Main roster · Week 1\nBring keys"},
+    )
+    exception = entry.runtime_data.data.exceptions[date(2026, 11, 16)]
+    assert (exception.assignment, exception.note) == (None, "Bring keys")
+    # Clearing the description removes the note.
+    await entity.async_update_event(
+        uid(entry, MONDAY),
+        {**unchanged, "description": "Main roster · Week 1"},
+    )
+    assert not entry.runtime_data.data.exceptions
+
+
+async def test_update_event_keeps_note_without_origin_line(hass: HomeAssistant, entry):
+    await add_roster(entry, {"mon": "open"})
+    await calendar_entity(hass).async_update_event(
+        uid(entry, MONDAY),
+        {
+            "dtstart": local(2026, 11, 16, 8),
+            "dtend": local(2026, 11, 16, 12),
+            "summary": "Open",
+            "description": "Main roster · Week 1\nCover for Sam",
+        },
+    )
+    exception = entry.runtime_data.data.exceptions[date(2026, 11, 16)]
+    assert exception.assignment.type == "custom"
+    assert exception.note == "Cover for Sam"
+
+
+async def test_delete_keeps_note(hass: HomeAssistant, entry):
+    await add_roster(entry, {"mon": "open"})
+    store = entry.runtime_data
+    await store.async_mutate(
+        lambda d: d.set_exception({"date": MONDAY, "note": "Bring keys"})
+    )
+    await calendar_entity(hass).async_delete_event(uid(entry, MONDAY))
+    exception = store.data.exceptions[date(2026, 11, 16)]
+    assert (exception.assignment.type, exception.note) == ("off", "Bring keys")
+
+
 async def stock_create(hass: HomeAssistant, hass_ws_client, token=None) -> dict:
     """Create an event the way the stock Calendar screen does."""
     client = await hass_ws_client(hass, token) if token else await hass_ws_client(hass)

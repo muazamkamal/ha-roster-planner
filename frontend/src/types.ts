@@ -53,9 +53,11 @@ export interface Variation {
   days?: Days;
 }
 
+/** A one-off change. With no assignment the day follows the roster and only
+ * carries the note. */
 export interface RosterException {
   date: string;
-  assignment: DayAssignment;
+  assignment?: DayAssignment;
   note?: string;
 }
 

@@ -205,6 +205,30 @@ def test_exception_set_replaces_and_clear_removes():
     assert not data.exceptions
 
 
+def test_note_only_exception_round_trips():
+    data, shift_type, _ = populated()
+    data.set_exception({"date": "2026-11-16", "note": "Bring keys"})
+    exception = data.exceptions[date(2026, 11, 16)]
+    assert exception.assignment is None
+    assert exception.to_dict() == {"date": "2026-11-16", "note": "Bring keys"}
+    assert RosterData.from_dict(data.to_dict()).to_dict() == data.to_dict()
+    # Note-only days do not count as a use of the shift type.
+    assert data.shift_type_usages(shift_type.id) == ["Week pattern: Week A"]
+    other = data.create_shift_type({**SHIFT, "name": "Other"})
+    data.delete_shift_type(shift_type.id, replace_with=other.id)
+    assert data.exceptions[date(2026, 11, 16)].assignment is None
+
+
+@pytest.mark.parametrize("note", [None, "", "   "])
+def test_exception_needs_a_change_or_a_note(note):
+    expect(
+        "required",
+        "note",
+        RosterData().set_exception,
+        {"date": "2026-11-16", "note": note},
+    )
+
+
 def test_round_trip():
     data, shift_type, _ = populated()
     data.create_variation(VARIATION)

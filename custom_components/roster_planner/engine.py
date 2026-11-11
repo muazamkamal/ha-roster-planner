@@ -193,6 +193,12 @@ def resolve(day: date, data: RosterData, tz: tzinfo) -> Resolved | None:
     exception = data.exception_for(day)
     if exception is None:
         return resolve_without_exception(day, data, tz)
+    if exception.assignment is None:
+        # A note on its own: the day still follows the roster.
+        resolved = resolve_without_exception(day, data, tz)
+        if resolved is not None:
+            resolved.note = exception.note
+        return resolved
     resolved = _to_resolved(
         exception.assignment, day, data, tz, "exception", day.isoformat()
     )

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, tzinfo
 from typing import Any
 
 from homeassistant.auth.models import User
@@ -84,14 +84,23 @@ async def _async_check_permission(
         raise Unauthorized(context=call.context)
 
 
-def _assignment(entity: RosterCalendarEntity, call: ServiceCall) -> dict[str, Any]:
-    """Build a day assignment from exactly one of shift_type, start/end or off."""
+def _assignment(
+    entity: RosterCalendarEntity, call: ServiceCall
+) -> dict[str, Any] | None:
+    """Build a day assignment from exactly one of shift_type, start/end or off.
+
+    With none of them and a note, return None: the note goes on the rostered day.
+    """
     data = call.data
     off = data.get(ATTR_OFF, False)
     has_times = ATTR_START in data or ATTR_END in data
-    if sum((off, ATTR_SHIFT_TYPE in data, has_times)) != 1:
+    given = sum((off, ATTR_SHIFT_TYPE in data, has_times))
+    if given == 0 and data.get(ATTR_NOTE):
+        return None
+    if given != 1:
         raise ServiceValidationError(
-            "Provide exactly one of: shift_type, start and end, or off"
+            "Provide exactly one of: shift_type, start and end, or off. "
+            "Or give only a note."
         )
     if off:
         return {"type": "off"}
@@ -233,11 +242,33 @@ class RosterCalendarEntity(CalendarEntity):
         payload = self._exception_from_event(event)
 
         def apply(data: RosterData) -> None:
+            tz = dt_util.get_default_time_zone()
+            # The description we sent starts with a generated origin line.
+            current = engine.resolve(old_day, data, tz)
+            if current is not None:
+                payload["note"] = _strip_origin(payload["note"], current)
             if payload["date"] != old_day:
                 self._cancel(data, old_day)
+            elif self._is_rostered(data, old_day, event, tz):
+                # Only the description changed: keep following the roster.
+                _set_note(data, old_day, payload["note"])
+                return
             data.set_exception(payload)
 
         await self._async_apply(apply)
+
+    def _is_rostered(
+        self, data: RosterData, day: date, event: dict[str, Any], tz: tzinfo
+    ) -> bool:
+        """Return True if the event matches what the roster gives on the day."""
+        base = engine.resolve_without_exception(day, data, tz)
+        title = (event.get("summary") or "").removeprefix(self._prefix)
+        return (
+            base is not None
+            and base.title == title
+            and base.start == event["dtstart"]
+            and base.end == event["dtend"]
+        )
 
     async def _async_check_permission(self) -> None:
         """Apply the edit rule to edits made through the stock calendar.
@@ -264,11 +295,16 @@ class RosterCalendarEntity(CalendarEntity):
             raise HomeAssistantError(err.message) from err
 
     def _cancel(self, data: RosterData, day: date) -> None:
+        """Make the day off, keeping any note on it."""
         tz = dt_util.get_default_time_zone()
+        existing = data.exception_for(day)
+        note = existing.note if existing else None
         if engine.resolve_without_exception(day, data, tz) is None:
-            data.clear_exception(day)
+            _set_note(data, day, note)
         else:
-            data.set_exception({"date": day, "assignment": {"type": "off"}})
+            data.set_exception(
+                {"date": day, "assignment": {"type": "off"}, "note": note}
+            )
 
     def _date_from_uid(self, uid: str) -> date:
         prefix = f"{self.entry.entry_id}-"
@@ -327,12 +363,34 @@ def _reject_series(recurrence_range: str | None) -> None:
         raise HomeAssistantError("Repeating events are not supported")
 
 
-def _describe(shift: engine.Resolved) -> str:
+def _set_note(data: RosterData, day: date, note: str | None) -> None:
+    """Leave the day on the roster, with the note if there is one."""
+    if note:
+        data.set_exception({"date": day, "note": note})
+    else:
+        data.clear_exception(day)
+
+
+def _origin(shift: engine.Resolved) -> str:
     """Say where a shift came from."""
     if shift.source == "exception":
-        origin = "Extra shift" if shift.flag == "extra" else "Changed shift"
-    elif shift.source == "variation":
-        origin = f"Variation: {shift.source_name}"
-    else:
-        origin = f"{shift.source_name} · Week {shift.week}"
+        return "Extra shift" if shift.flag == "extra" else "Changed shift"
+    if shift.source == "variation":
+        return f"Variation: {shift.source_name}"
+    return f"{shift.source_name} · Week {shift.week}"
+
+
+def _describe(shift: engine.Resolved) -> str:
+    """Return the event description: the origin, then the note."""
+    origin = _origin(shift)
     return f"{origin}\n{shift.note}" if shift.note else origin
+
+
+def _strip_origin(description: str | None, shift: engine.Resolved) -> str | None:
+    """Return the user's note from a description we generated for the shift."""
+    if description is None:
+        return None
+    origin = _origin(shift)
+    if description.strip() == origin:
+        return None
+    return description.removeprefix(f"{origin}\n")

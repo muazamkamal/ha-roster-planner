@@ -2,7 +2,7 @@ import { useState } from "react";
 import { formatDay } from "../dates";
 import { useRoster, useSubmit } from "../hooks";
 import type { RosterException } from "../types";
-import { describeAssignment, splitExceptions } from "../viewModel";
+import { describeException, splitExceptions } from "../viewModel";
 import { Confirm, FormError } from "./ui";
 
 const Row = ({
@@ -19,8 +19,7 @@ const Row = ({
         <span>
           {formatDay(item.date, "EEE d MMM yyyy")}
           <span className="muted list-detail">
-            {describeAssignment(item.assignment, config.shift_types)}
-            {item.note ? ` · ${item.note}` : ""}
+            {describeException(item, config.shift_types)}
           </span>
         </span>
       </span>
@@ -79,7 +78,11 @@ export const Exceptions = () => {
       {removing && (
         <Confirm
           title={`Remove the change on ${formatDay(removing.date, "d MMM")}?`}
-          message="This date will follow the roster again."
+          message={
+            removing.assignment
+              ? "This date will follow the roster again."
+              : "The note will be removed."
+          }
           action="Remove"
           onConfirm={remove}
           onCancel={() => setRemoving(null)}

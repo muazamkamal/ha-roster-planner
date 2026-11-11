@@ -228,6 +228,18 @@ async def test_exception_set_and_clear(api: Api):
     assert days[0]["shift"]["title"] == "Open"
 
 
+async def test_exception_note_only(api: Api):
+    await seed(api)
+    await api.call("exception/set", date=MONDAY, assignment=None, note="Keys")
+    days = await api.call("resolve", start=MONDAY, end=MONDAY)
+    assert days[0]["shift"]["title"] == "Open"
+    assert days[0]["shift"]["source"] == "rotation"
+    assert days[0]["shift"]["note"] == "Keys"
+    assert days[0]["exception"] == {"date": MONDAY, "note": "Keys"}
+    error = await api.error("exception/set", date=MONDAY)
+    assert error["code"] == "required"
+
+
 async def test_exception_invalid_times(api: Api):
     error = await api.error(
         "exception/set",

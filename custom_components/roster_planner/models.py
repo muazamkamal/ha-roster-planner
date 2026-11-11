@@ -400,27 +400,31 @@ class Variation:
 
 @dataclass
 class RosterException:
-    """A one-off change on a single date."""
+    """A one-off change on a single date.
+
+    With no assignment the day follows the roster and only carries the note.
+    """
 
     date: date
-    assignment: DayAssignment
+    assignment: DayAssignment | None
     note: str | None = None
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> RosterException:
         """Build and validate from a payload."""
-        return cls(
-            date=_date(_require(payload, "date"), "date"),
-            assignment=DayAssignment.from_dict(_require(payload, "assignment")),
-            note=_text(payload, "note"),
-        )
+        day = _date(_require(payload, "date"), "date")
+        raw = payload.get("assignment")
+        assignment = None if raw is None else DayAssignment.from_dict(raw)
+        note = _text(payload, "note")
+        if assignment is None and note is None:
+            raise ValidationError("required", "Add a change or a note", "note")
+        return cls(date=day, assignment=assignment, note=note)
 
     def to_dict(self) -> dict[str, Any]:
         """Serialise."""
-        result: dict[str, Any] = {
-            "date": self.date.isoformat(),
-            "assignment": self.assignment.to_dict(),
-        }
+        result: dict[str, Any] = {"date": self.date.isoformat()}
+        if self.assignment is not None:
+            result["assignment"] = self.assignment.to_dict()
         if self.note:
             result["note"] = self.note
         return result
@@ -531,7 +535,8 @@ class RosterData:
                 )
             self._check_days(variation.days)
         for exception in self.exceptions.values():
-            self._check_assignment(exception.assignment, "assignment.shift_type_id")
+            if exception.assignment is not None:
+                self._check_assignment(exception.assignment, "assignment.shift_type_id")
         ordered = sorted(self.variations.values(), key=lambda v: v.start_date)
         for earlier, later in itertools.pairwise(ordered):
             if later.start_date <= earlier.end_date:
@@ -573,7 +578,7 @@ class RosterData:
         usages += [
             f"Exception: {e.date.isoformat()}"
             for e in self.exceptions.values()
-            if e.assignment.shift_type_id == shift_type_id
+            if e.assignment is not None and e.assignment.shift_type_id == shift_type_id
         ]
         return usages
 
@@ -641,7 +646,7 @@ class RosterData:
             assignments = [
                 *(a for p in self.patterns.values() for a in p.days.values()),
                 *(a for v in self.variations.values() for a in v.days.values()),
-                *(e.assignment for e in self.exceptions.values()),
+                *(e.assignment for e in self.exceptions.values() if e.assignment),
             ]
             for assignment in assignments:
                 if assignment.shift_type_id == item_id:

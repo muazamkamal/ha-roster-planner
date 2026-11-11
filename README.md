@@ -31,7 +31,7 @@ Open **Roster**, tap the gear, then work down the list:
 3. **Rotations**: a cycle of 1–12 weeks, one pattern per week, counted from a Monday. **Quick add: recurring shift** handles cases like "every 2 weeks on Monday".
 4. **Variations**: a date range that temporarily replaces the rotation, either with another pattern or by editing specific weekdays. The rotation resumes by itself afterwards.
 
-For one-off changes, tap a day on the main screen.
+For one-off changes, tap a day on the main screen. A note saved on its own leaves the day on the roster, so later rule changes still apply to it.
 
 Each date is resolved in this order, and the first answer wins: one-off exception, then variation, then rotations by priority. An empty slot or day off in a rotation falls through to the next rotation, so a "Monday every other week" rotation can sit alongside a main Tuesday-to-Saturday one.
 
@@ -57,7 +57,7 @@ Automations can always use the services below.
 
 The calendar can also be edited from the stock Calendar screen or `calendar.create_event`. Those edits are saved as one-off exceptions. Repeating and all-day events are rejected, and a shift must be shorter than 24 hours.
 
-`roster_planner.set_exception` takes a `date` and exactly one of `shift_type`, `start` and `end`, or `off`. `roster_planner.clear_exception` takes a `date`.
+`roster_planner.set_exception` takes a `date` and exactly one of `shift_type`, `start` and `end`, or `off`, plus an optional `note`. With only a `note`, the date keeps its rostered shift. `roster_planner.clear_exception` takes a `date`.
 
 ```yaml
 action: roster_planner.set_exception

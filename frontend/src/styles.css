@@ -236,6 +236,15 @@ p {
   border-radius: 50%;
 }
 
+.marker.ring {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--primary-color);
+  border-radius: 50%;
+}
+
 .month {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));

@@ -12,6 +12,7 @@ import {
   assignmentOf,
   byPriority,
   describeAssignment,
+  describeException,
   firstOccurrence,
   groupVariations,
   markerOf,
@@ -54,6 +55,8 @@ const off: RosterException = {
   date: "2026-11-17",
   assignment: { type: "off" },
 };
+
+const noteOnly: RosterException = { date: "2026-11-17", note: "Bring keys" };
 
 describe("timeRange", () => {
   it("formats a same-day shift", () => {
@@ -99,6 +102,14 @@ describe("markerOf", () => {
   it("ignores an off exception on a day already off", () => {
     expect(markerOf(day({ exception: off }))).toBeNull();
   });
+  it("marks a note on a rostered day as a note, not a change", () => {
+    expect(
+      markerOf(day({ shift: shift(), base: shift(), exception: noteOnly })),
+    ).toBe("note");
+  });
+  it("marks a note on a day off", () => {
+    expect(markerOf(day({ exception: noteOnly }))).toBe("note");
+  });
 });
 
 describe("actionsFor", () => {
@@ -120,6 +131,20 @@ describe("actionsFor", () => {
   });
   it("offers reset when an exception exists", () => {
     expect(actionsFor(day({ exception: off })).reset).toBe(true);
+  });
+  it("has nothing to reset for a note on its own", () => {
+    expect(
+      actionsFor(day({ shift: shift(), base: shift(), exception: noteOnly })),
+    ).toEqual({ change: true, extra: false, off: true, reset: false });
+  });
+});
+
+describe("describeException", () => {
+  it("shows the change and the note", () => {
+    expect(describeException({ ...off, note: "Sick" }, [])).toBe("Off · Sick");
+  });
+  it("shows a note on its own", () => {
+    expect(describeException(noteOnly, [])).toBe("Note · Bring keys");
   });
 });
 

@@ -47,6 +47,7 @@ const Marker = ({ day }: { day: DayDetail }) => {
   const marker = markerOf(day);
   if (marker === "extra") return <span className="marker plus">+</span>;
   if (marker === "changed") return <span className="marker dot" />;
+  if (marker === "note") return <span className="marker ring" />;
   return null;
 };
 

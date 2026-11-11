@@ -46,7 +46,7 @@
   "services": {
     "set_exception": {
       "name": "Set exception",
-      "description": "Adds or changes a one-off shift on a date, or marks it as a day off.",
+      "description": "Adds or changes a one-off shift on a date, marks it as a day off, or adds a note to it.",
       "fields": {
         "date": {
           "name": "Date",
@@ -74,7 +74,7 @@
         },
         "note": {
           "name": "Note",
-          "description": "Optional note."
+          "description": "Optional note. On its own, the date keeps its rostered shift."
         }
       }
     },
