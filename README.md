@@ -93,7 +93,7 @@ The built panel is committed so HACS users need no Node toolchain, and CI fails 
 
 Choices made where the design left room, or where Home Assistant required a change:
 
-- Schemas use `probatio`, which replaced `voluptuous` in Home Assistant core. This is why 2026.10 is the minimum version.
+- Schemas use `probatio`, which replaced `voluptuous` in Home Assistant core. Tested on 2026.10.4; earlier releases may not include it.
 - Websocket commands use `item_id`, because `id` is reserved for the message id.
 - The base `CalendarEntity` schedules its own state changes at each event's start and end. The integration adds only a daily refresh, for shifts beyond the 60-day lookahead.
 - `roster_planner/resolve` returns every date, including days off, so the panel can offer "Reset to roster" on a cancelled day.
