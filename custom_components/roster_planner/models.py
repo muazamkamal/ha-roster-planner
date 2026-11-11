@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime
 import itertools
 import re
 import secrets
@@ -21,6 +21,7 @@ MIN_CYCLE_WEEKS = 1
 MAX_CYCLE_WEEKS = 12
 
 _TIME_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
+_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _COLOUR_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 
@@ -53,6 +54,34 @@ def _name(payload: dict[str, Any]) -> str:
     return value.strip()
 
 
+def _text(payload: dict[str, Any], key: str) -> str | None:
+    """Return optional free text, with blank treated as absent."""
+    value = payload.get(key)
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ValidationError("invalid_format", f"{key} must be text", key)
+    return value.strip() or None
+
+
+def _ref(payload: Any, key: str) -> str:
+    """Return a required reference to another item's id."""
+    value = _require(payload, key)
+    if not isinstance(value, str):
+        raise ValidationError("invalid_format", f"{key} must be text", key)
+    return value
+
+
+def _id(payload: dict[str, Any]) -> str:
+    """Return the payload's id, or a new one."""
+    value = payload.get("id")
+    if value is None or value == "":
+        return new_id()
+    if not isinstance(value, str):
+        raise ValidationError("invalid_format", "id must be text", "id")
+    return value
+
+
 def _time(value: Any, key: str) -> str:
     if not isinstance(value, str) or not _TIME_RE.match(value):
         raise ValidationError("invalid_time", "Use 24-hour HH:MM", key)
@@ -60,11 +89,16 @@ def _time(value: Any, key: str) -> str:
 
 
 def _date(value: Any, key: str) -> date:
+    if isinstance(value, datetime):
+        return value.date()
     if isinstance(value, date):
         return value
+    # fromisoformat also takes forms like 20261224 and 2026-W52-4.
+    if not isinstance(value, str) or not _DATE_RE.match(value):
+        raise ValidationError("invalid_date", "Use YYYY-MM-DD", key)
     try:
         return date.fromisoformat(value)
-    except (TypeError, ValueError) as err:
+    except ValueError as err:
         raise ValidationError("invalid_date", "Use YYYY-MM-DD", key) from err
 
 
@@ -103,12 +137,12 @@ class ShiftType:
         if not isinstance(colour, str) or not _COLOUR_RE.match(colour):
             raise ValidationError("invalid_colour", "Use #RRGGBB", "colour")
         return cls(
-            id=payload.get("id") or new_id(),
+            id=_id(payload),
             name=_name(payload),
             start=start,
             end=end,
             colour=colour,
-            notes=payload.get("notes") or None,
+            notes=_text(payload, "notes"),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -142,7 +176,7 @@ class DayAssignment:
         if kind == "off":
             return cls(type="off")
         if kind == "shift":
-            return cls(type="shift", shift_type_id=_require(payload, "shift_type_id"))
+            return cls(type="shift", shift_type_id=_ref(payload, "shift_type_id"))
         if kind == "custom":
             start = _time(_require(payload, "start"), "start")
             end = _time(_require(payload, "end"), "end")
@@ -151,7 +185,7 @@ class DayAssignment:
                 type="custom",
                 start=start,
                 end=end,
-                label=payload.get("label") or None,
+                label=_text(payload, "label"),
             )
         raise ValidationError(
             "invalid_assignment", "Type must be shift, custom or off", "type"
@@ -197,7 +231,7 @@ class WeekPattern:
     def from_dict(cls, payload: dict[str, Any]) -> WeekPattern:
         """Build and validate from a payload."""
         return cls(
-            id=payload.get("id") or new_id(),
+            id=_id(payload),
             name=_name(payload),
             days=_days(payload.get("days", {}), "days"),
         )
@@ -268,11 +302,11 @@ class Rotation:
                 "invalid_priority", "Must be a whole number", "priority"
             )
         return cls(
-            id=payload.get("id") or new_id(),
+            id=_id(payload),
             name=_name(payload),
             anchor=anchor,
             cycle_weeks=cycle_weeks,
-            slots=slots,
+            slots=list(slots),
             active_from=active_from,
             active_until=active_until,
             priority=priority,
@@ -323,7 +357,7 @@ class Variation:
             )
         mode = _require(payload, "mode")
         if mode == "pattern":
-            pattern_id = _require(payload, "pattern_id")
+            pattern_id = _ref(payload, "pattern_id")
             days: dict[str, DayAssignment] = {}
         elif mode == "days":
             pattern_id = None
@@ -335,7 +369,7 @@ class Variation:
                 "invalid_mode", "Mode must be pattern or days", "mode"
             )
         return cls(
-            id=payload.get("id") or new_id(),
+            id=_id(payload),
             name=_name(payload),
             start_date=start_date,
             end_date=end_date,
@@ -378,7 +412,7 @@ class RosterException:
         return cls(
             date=_date(_require(payload, "date"), "date"),
             assignment=DayAssignment.from_dict(_require(payload, "assignment")),
-            note=payload.get("note") or None,
+            note=_text(payload, "note"),
         )
 
     def to_dict(self) -> dict[str, Any]:

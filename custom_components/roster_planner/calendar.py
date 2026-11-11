@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from typing import Any
 
+from homeassistant.auth.models import User
 from homeassistant.components.calendar import (
     CalendarEntity,
     CalendarEntityFeature,
     CalendarEvent,
 )
-from homeassistant.core import HomeAssistant, ServiceCall, callback
+from homeassistant.components.websocket_api import current_connection
+from homeassistant.const import EVENT_CORE_CONFIG_UPDATE
+from homeassistant.core import Event, HomeAssistant, ServiceCall, callback
 from homeassistant.exceptions import (
     HomeAssistantError,
     ServiceValidationError,
@@ -99,11 +103,14 @@ def _assignment(entity: RosterCalendarEntity, call: ServiceCall) -> dict[str, An
             "label": data.get(ATTR_LABEL),
         }
     wanted = data[ATTR_SHIFT_TYPE]
-    for shift_type in entity.store.data.shift_types.values():
-        if wanted in (shift_type.id, shift_type.name) or (
-            wanted.casefold() == shift_type.name.casefold()
-        ):
-            return {"type": "shift", "shift_type_id": shift_type.id}
+    shift_types = entity.store.data.shift_types.values()
+    # An exact id or name wins over a name that differs only by case.
+    for matches in (
+        lambda item: wanted in (item.id, item.name),
+        lambda item: wanted.casefold() == item.name.casefold(),
+    ):
+        if found := next(filter(matches, shift_types), None):
+            return {"type": "shift", "shift_type_id": found.id}
     raise ServiceValidationError(f"Unknown shift type: {wanted}")
 
 
@@ -166,11 +173,15 @@ class RosterCalendarEntity(CalendarEntity):
         self.async_on_remove(self.store.async_add_listener(self.async_write_ha_state))
 
         @callback
-        def refresh(_: datetime) -> None:
+        def refresh(_: datetime | Event) -> None:
             self.async_write_ha_state()
 
         self.async_on_remove(
             async_track_time_change(self.hass, refresh, hour=0, minute=0, second=5)
+        )
+        # Shift times are wall-clock, so a timezone change moves every one of them.
+        self.async_on_remove(
+            self.hass.bus.async_listen(EVENT_CORE_CONFIG_UPDATE, refresh)
         )
 
     @property
@@ -192,6 +203,7 @@ class RosterCalendarEntity(CalendarEntity):
 
     async def async_create_event(self, **kwargs: Any) -> None:
         """Save a new event as a one-off exception."""
+        await self._async_check_permission()
         payload = self._exception_from_event(kwargs)
         await self._async_apply(lambda data: data.set_exception(payload))
 
@@ -202,6 +214,7 @@ class RosterCalendarEntity(CalendarEntity):
         recurrence_range: str | None = None,
     ) -> None:
         """Cancel a shift. An extra shift is simply removed."""
+        await self._async_check_permission()
         _reject_series(recurrence_range)
         day = self._date_from_uid(uid)
         await self._async_apply(lambda data: self._cancel(data, day))
@@ -214,6 +227,7 @@ class RosterCalendarEntity(CalendarEntity):
         recurrence_range: str | None = None,
     ) -> None:
         """Change a shift, which may move it to another date."""
+        await self._async_check_permission()
         _reject_series(recurrence_range)
         old_day = self._date_from_uid(uid)
         payload = self._exception_from_event(event)
@@ -225,7 +239,25 @@ class RosterCalendarEntity(CalendarEntity):
 
         await self._async_apply(apply)
 
-    async def _async_apply(self, operation: Any) -> None:
+    async def _async_check_permission(self) -> None:
+        """Apply the edit rule to edits made through the stock calendar.
+
+        Home Assistant only checks that the user may control the entity, which
+        every user can by default, and does not pass the user on. A websocket
+        request leaves its connection in a context variable; a service call
+        sets the entity's context just before calling in.
+        """
+        user: User | None
+        if (connection := current_connection.get()) is not None:
+            user = connection.user
+        elif self._context is not None and self._context.user_id:
+            user = await self.hass.auth.async_get_user(self._context.user_id)
+        else:
+            return
+        if user is None or not can_edit(self.entry, user):
+            raise Unauthorized(context=self._context)
+
+    async def _async_apply(self, operation: Callable[[RosterData], object]) -> None:
         try:
             await self.store.async_mutate(operation)
         except ValidationError as err:

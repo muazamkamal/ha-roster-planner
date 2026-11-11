@@ -9,6 +9,7 @@ across a DST change, so all ordering here goes through UTC.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta, tzinfo
 
@@ -202,16 +203,18 @@ def resolve(day: date, data: RosterData, tz: tzinfo) -> Resolved | None:
     return resolved
 
 
-def day_detail(day: date, data: RosterData, tz: tzinfo) -> DayDetail:
-    """Return the full picture for one date."""
-    shift = resolve(day, data, tz)
-    previous = resolve(day - timedelta(days=1), data, tz)
+def _day_detail(
+    day: date, data: RosterData, tz: tzinfo, previous: Resolved | None
+) -> DayDetail:
+    exception = data.exception_for(day)
+    base = resolve_without_exception(day, data, tz)
+    shift = base if exception is None else resolve(day, data, tz)
     variation = data.variation_covering(day)
     return DayDetail(
         date=day,
         shift=shift,
-        base=resolve_without_exception(day, data, tz),
-        exception=data.exception_for(day),
+        base=base,
+        exception=exception,
         variation_id=variation.id if variation else None,
         overlaps_previous=(
             shift is not None
@@ -221,14 +224,23 @@ def day_detail(day: date, data: RosterData, tz: tzinfo) -> DayDetail:
     )
 
 
+def day_detail(day: date, data: RosterData, tz: tzinfo) -> DayDetail:
+    """Return the full picture for one date."""
+    return _day_detail(day, data, tz, resolve(day - timedelta(days=1), data, tz))
+
+
 def day_details(
     start: date, end: date, data: RosterData, tz: tzinfo
 ) -> list[DayDetail]:
     """Return details for every date from start to end, both inclusive."""
-    return [
-        day_detail(start + timedelta(days=offset), data, tz)
-        for offset in range((end - start).days + 1)
-    ]
+    result: list[DayDetail] = []
+    # Each day needs the one before it, so carry it along instead of resolving twice.
+    previous = resolve(start - timedelta(days=1), data, tz)
+    for offset in range((end - start).days + 1):
+        detail = _day_detail(start + timedelta(days=offset), data, tz, previous)
+        result.append(detail)
+        previous = detail.shift
+    return result
 
 
 def shifts_overlapping(
@@ -254,15 +266,16 @@ def shifts_overlapping(
 
 def _upcoming(
     now: datetime, data: RosterData, tz: tzinfo, lookahead_days: int
-) -> list[Resolved]:
-    """Return shifts not yet finished at ``now``, in order."""
+) -> Iterator[Resolved]:
+    """Yield shifts not yet finished at ``now``, in order.
+
+    Lazy, because callers want the first match and entities ask on every state write.
+    """
     today = now.astimezone(tz).date()
-    result = []
     for offset in range(-1, lookahead_days + 1):
         shift = resolve(today + timedelta(days=offset), data, tz)
         if shift is not None and _utc(shift.end) > _utc(now):
-            result.append(shift)
-    return result
+            yield shift
 
 
 def current_or_next(
@@ -272,8 +285,7 @@ def current_or_next(
     lookahead_days: int = LOOKAHEAD_DAYS,
 ) -> Resolved | None:
     """Return the running shift, else the next one within the lookahead."""
-    upcoming = _upcoming(now, data, tz, lookahead_days)
-    return upcoming[0] if upcoming else None
+    return next(_upcoming(now, data, tz, lookahead_days), None)
 
 
 def next_start(

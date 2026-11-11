@@ -235,6 +235,32 @@ def test_round_trip():
             "duplicate_date",
         ),
         ({"rotations": [{**ROTATION, "slots": ["ghost"]}]}, "unknown_pattern"),
+        # A hand-edited backup can hold any JSON type where text belongs.
+        ({"shift_types": [SHIFT | {"id": 7}]}, "invalid_format"),
+        ({"shift_types": [SHIFT | {"notes": ["x"]}]}, "invalid_format"),
+        (
+            {
+                "patterns": [
+                    {
+                        "name": "P",
+                        "days": {"mon": {"type": "shift", "shift_type_id": ["x"]}},
+                    }
+                ]
+            },
+            "invalid_format",
+        ),
+        (
+            {"variations": [VARIATION | {"mode": "pattern", "pattern_id": {}}]},
+            "invalid_format",
+        ),
+        (
+            {"exceptions": [{"date": "20260101", "assignment": {"type": "off"}}]},
+            "invalid_date",
+        ),
+        (
+            {"exceptions": [{"date": 20260101, "assignment": {"type": "off"}}]},
+            "invalid_date",
+        ),
     ],
 )
 def test_import_rejects_bad_data(payload, code):

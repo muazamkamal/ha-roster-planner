@@ -32,6 +32,10 @@ async def _schema(hass: HomeAssistant, defaults: dict[str, Any]) -> vol.Schema:
         for user in await hass.auth.async_get_users()
         if user.is_active and not user.system_generated
     ]
+    # A previous owner may have been deleted or deactivated since.
+    owner = defaults.get(CONF_OWNER)
+    if owner not in {user["value"] for user in users}:
+        owner = NO_OWNER
     return vol.Schema(
         {
             vol.Required(
@@ -45,9 +49,7 @@ async def _schema(hass: HomeAssistant, defaults: dict[str, Any]) -> vol.Schema:
                 CONF_LOCATION,
                 description={"suggested_value": defaults.get(CONF_LOCATION, "")},
             ): TextSelector(),
-            vol.Required(
-                CONF_OWNER, default=defaults.get(CONF_OWNER) or NO_OWNER
-            ): SelectSelector(
+            vol.Required(CONF_OWNER, default=owner): SelectSelector(
                 SelectSelectorConfig(
                     options=[
                         SelectOptionDict(

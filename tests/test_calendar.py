@@ -411,3 +411,95 @@ async def test_update_event_moving_date_cancels_old_day(hass: HomeAssistant, ent
     )
     found = await events(hass, local(2026, 11, 16), local(2026, 11, 18))
     assert [e["start"][:10] for e in found] == ["2026-11-17"]
+
+
+async def stock_create(hass: HomeAssistant, hass_ws_client, token=None) -> dict:
+    """Create an event the way the stock Calendar screen does."""
+    client = await hass_ws_client(hass, token) if token else await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {
+            "type": "calendar/event/create",
+            "entity_id": ENTITY,
+            "event": {
+                "summary": "Training",
+                "dtstart": "2026-11-17T09:00:00+08:00",
+                "dtend": "2026-11-17T10:00:00+08:00",
+            },
+        }
+    )
+    return await client.receive_json()
+
+
+@pytest.fixture
+async def normal_user(hass: HomeAssistant, hass_admin_user):
+    """A non-admin user who, as is the default, may control every entity.
+
+    The admin is created first because the first user becomes the owner.
+    """
+    return await hass.auth.async_create_user("Normal", group_ids=["system-users"])
+
+
+@pytest.fixture
+async def normal_token(hass: HomeAssistant, normal_user) -> str:
+    refresh = await hass.auth.async_create_refresh_token(normal_user, "https://x/")
+    return hass.auth.async_create_access_token(refresh)
+
+
+async def test_stock_calendar_edit_denied_for_non_owner(
+    hass: HomeAssistant, entry, hass_ws_client, normal_token
+):
+    result = await stock_create(hass, hass_ws_client, normal_token)
+    assert not result["success"]
+    assert not entry.runtime_data.data.exceptions
+
+
+async def test_stock_calendar_edit_allowed_for_owner_and_admin(
+    hass: HomeAssistant, entry, hass_ws_client, normal_user, normal_token
+):
+    assert (await stock_create(hass, hass_ws_client))["success"]
+    await entry.runtime_data.async_mutate(
+        lambda d: d.clear_exception(date(2026, 11, 17))
+    )
+    hass.config_entries.async_update_entry(
+        entry, data={**entry.data, "owner": normal_user.id}
+    )
+    result = await stock_create(hass, hass_ws_client, normal_token)
+    assert result["success"]
+    assert date(2026, 11, 17) in entry.runtime_data.data.exceptions
+
+
+async def test_create_event_service_denied_for_non_owner(
+    hass: HomeAssistant, entry, normal_user
+):
+    with pytest.raises(Unauthorized):
+        await hass.services.async_call(
+            CALENDAR_DOMAIN,
+            "create_event",
+            {
+                "entity_id": ENTITY,
+                "summary": "Training",
+                "start_date_time": "2026-11-17 09:00:00",
+                "end_date_time": "2026-11-17 10:00:00",
+            },
+            blocking=True,
+            context=Context(user_id=normal_user.id),
+        )
+    assert not entry.runtime_data.data.exceptions
+
+
+async def test_set_exception_prefers_exact_shift_type_name(hass: HomeAssistant, entry):
+    store = entry.runtime_data
+    for name in ("open", "Open"):
+        await store.async_mutate(
+            lambda d, name=name: d.create_shift_type(
+                {"name": name, "start": "07:00", "end": "15:30"}
+            )
+        )
+    await hass.services.async_call(
+        DOMAIN,
+        "set_exception",
+        {"entity_id": ENTITY, "date": MONDAY, "shift_type": "Open"},
+        blocking=True,
+    )
+    chosen = store.data.exceptions[date(2026, 11, 16)].assignment.shift_type_id
+    assert store.data.shift_types[chosen].name == "Open"

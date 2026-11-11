@@ -6,7 +6,8 @@ from collections.abc import Callable
 from datetime import datetime, tzinfo
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
-from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
+from homeassistant.const import EVENT_CORE_CONFIG_UPDATE
+from homeassistant.core import CALLBACK_TYPE, Event, HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.event import (
@@ -75,6 +76,10 @@ class RosterTimeSensor(SensorEntity):
                 self.hass, self._async_refresh, hour=0, minute=0, second=5
             )
         )
+        # Shift times are wall-clock, so a timezone change moves every one of them.
+        self.async_on_remove(
+            self.hass.bus.async_listen(EVENT_CORE_CONFIG_UPDATE, self._async_refresh)
+        )
         self.async_on_remove(self._async_cancel_alarm)
         self._async_refresh()
 
@@ -85,7 +90,7 @@ class RosterTimeSensor(SensorEntity):
             self._alarm = None
 
     @callback
-    def _async_refresh(self, _: datetime | None = None) -> None:
+    def _async_refresh(self, _: datetime | Event | None = None) -> None:
         self._async_cancel_alarm()
         value = self._value(
             dt_util.now(), self._store.data, dt_util.get_default_time_zone()

@@ -107,3 +107,19 @@ async def test_rule_change_updates_sensors(
         lambda d: d.set_exception({"date": "2026-11-16", "assignment": {"type": "off"}})
     )
     assert hass.states.get(START).state == iso(local(2026, 11, 17, 7, 0))
+
+
+async def test_timezone_change_recomputes(hass: HomeAssistant, entry, freezer):
+    await tick(hass, freezer, datetime(2026, 11, 16, 1, 0, tzinfo=dt_util.UTC))
+    await seed(entry)
+    before = hass.states.get(START).state
+    await hass.config.async_update(time_zone="Europe/London")
+    await hass.async_block_till_done()
+    after = hass.states.get(START).state
+    assert before != after
+    assert (
+        dt_util.parse_datetime(after)
+        .astimezone(dt_util.get_time_zone("Europe/London"))
+        .strftime("%H:%M")
+        == "07:00"
+    )

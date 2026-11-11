@@ -73,3 +73,12 @@ async def test_options_update_settings_and_title(
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert entry.title == "Job"
     assert entry.options["owner"] == hass_admin_user.id
+
+
+async def test_options_form_copes_with_deleted_owner(hass: HomeAssistant, entry):
+    hass.config_entries.async_update_entry(
+        entry, data={**entry.data, "owner": "gone-user-id"}
+    )
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    owner = next(key for key in result["data_schema"].schema if key == "owner")
+    assert owner.default() == "none"

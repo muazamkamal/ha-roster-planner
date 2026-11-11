@@ -396,3 +396,24 @@ def test_day_detail_flags_overlap_with_previous_night():
 def test_day_details_is_inclusive():
     details = engine.day_details(ANCHOR, ANCHOR + timedelta(days=6), build(), TZ)
     assert len(details) == 7
+
+
+def test_day_details_matches_day_by_day():
+    data = build(
+        [
+            {
+                "id": "p",
+                "name": "P",
+                "days": {"mon": shift("night"), "tue": custom("05:00", "09:00")},
+            }
+        ],
+        [rotation(["p"])],
+        [variation(mode="days", days={"wed": shift("close")})],
+        [{"date": "2026-11-17", "assignment": {"type": "off"}}],
+    )
+    start, end = ANCHOR - timedelta(days=3), ANCHOR + timedelta(days=20)
+    one_by_one = [
+        engine.day_detail(start + timedelta(days=offset), data, TZ)
+        for offset in range((end - start).days + 1)
+    ]
+    assert engine.day_details(start, end, data, TZ) == one_by_one

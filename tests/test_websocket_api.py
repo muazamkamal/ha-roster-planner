@@ -358,3 +358,8 @@ async def test_owner_can_mutate_without_admin(
     )
     created = await read_only_api.call("shift_type/create", item=SHIFT)
     assert created["name"] == "Open"
+
+
+async def test_preview_needs_a_draft(api: Api):
+    error = await api.error("preview", start=MONDAY, end=MONDAY)
+    assert error["code"] == "required"

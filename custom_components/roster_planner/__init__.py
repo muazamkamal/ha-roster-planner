@@ -8,6 +8,7 @@ from homeassistant.components import frontend, panel_custom
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.loader import async_get_integration
@@ -23,6 +24,7 @@ from .const import (
     PANEL_URL_PATH,
 )
 from .helpers import RosterConfigEntry
+from .models import ValidationError
 from .store import RosterStore
 
 PLATFORMS = [Platform.CALENDAR, Platform.SENSOR]
@@ -52,17 +54,22 @@ async def _async_register_panel(hass: HomeAssistant) -> None:
     """Add the sidebar panel unless another roster already has."""
     if hass.data.get(DATA_PANEL_REGISTERED):
         return
+    # Set before awaiting so two rosters starting together register it once.
     hass.data[DATA_PANEL_REGISTERED] = True
-    integration = await async_get_integration(hass, DOMAIN)
-    await panel_custom.async_register_panel(
-        hass,
-        frontend_url_path=PANEL_URL_PATH,
-        webcomponent_name=PANEL_COMPONENT,
-        sidebar_title=PANEL_TITLE,
-        sidebar_icon=PANEL_ICON,
-        module_url=f"{PANEL_STATIC_URL}/{PANEL_BUNDLE}?v={integration.version}",
-        require_admin=False,
-    )
+    try:
+        integration = await async_get_integration(hass, DOMAIN)
+        await panel_custom.async_register_panel(
+            hass,
+            frontend_url_path=PANEL_URL_PATH,
+            webcomponent_name=PANEL_COMPONENT,
+            sidebar_title=PANEL_TITLE,
+            sidebar_icon=PANEL_ICON,
+            module_url=f"{PANEL_STATIC_URL}/{PANEL_BUNDLE}?v={integration.version}",
+            require_admin=False,
+        )
+    except BaseException:
+        hass.data.pop(DATA_PANEL_REGISTERED, None)
+        raise
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: RosterConfigEntry) -> bool:
@@ -70,7 +77,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: RosterConfigEntry) -> bo
     stores: dict[str, RosterStore] = hass.data[DOMAIN]
     if (store := stores.get(entry.entry_id)) is None:
         store = RosterStore(hass, entry.entry_id)
-        await store.async_load()
+        try:
+            await store.async_load()
+        except ValidationError as err:
+            raise ConfigEntryError(
+                f"Stored roster for {entry.title} is invalid: {err.message}"
+            ) from err
         stores[entry.entry_id] = store
     entry.runtime_data = store
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)

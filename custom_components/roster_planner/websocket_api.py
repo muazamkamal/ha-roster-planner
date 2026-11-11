@@ -155,11 +155,21 @@ def _details(data: RosterData, start: date, end: date) -> list[dict[str, object]
     return [day.to_dict() for day in engine.day_details(start, end, data, tz)]
 
 
-async def _get(hass, connection, entry, msg) -> dict[str, Any]:
+async def _get(
+    hass: HomeAssistant,
+    connection: ActiveConnection,
+    entry: RosterConfigEntry,
+    msg: dict[str, Any],
+) -> dict[str, Any]:
     return entry.runtime_data.data.to_dict()
 
 
-async def _subscribe(hass, connection, entry, msg) -> object:
+async def _subscribe(
+    hass: HomeAssistant,
+    connection: ActiveConnection,
+    entry: RosterConfigEntry,
+    msg: dict[str, Any],
+) -> object:
     store = entry.runtime_data
 
     @callback
@@ -174,23 +184,45 @@ async def _subscribe(hass, connection, entry, msg) -> object:
     return _ALREADY_SENT
 
 
-async def _resolve(hass, connection, entry, msg) -> list[dict[str, object]]:
+async def _resolve(
+    hass: HomeAssistant,
+    connection: ActiveConnection,
+    entry: RosterConfigEntry,
+    msg: dict[str, Any],
+) -> list[dict[str, object]]:
     return _details(entry.runtime_data.data, msg["start"], msg["end"])
 
 
-async def _preview(hass, connection, entry, msg) -> list[dict[str, object]]:
-    kind = "rotation" if "rotation" in msg else "variation"
+async def _preview(
+    hass: HomeAssistant,
+    connection: ActiveConnection,
+    entry: RosterConfigEntry,
+    msg: dict[str, Any],
+) -> list[dict[str, object]]:
+    kind = next((key for key in ("rotation", "variation") if key in msg), None)
+    if kind is None:
+        raise ValidationError("required", "Provide a rotation or a variation")
     draft = entry.runtime_data.data.with_draft(kind, msg[kind])
     return _details(draft, msg["start"], msg["end"])
 
 
-async def _import(hass, connection, entry, msg) -> dict[str, Any]:
+async def _import(
+    hass: HomeAssistant,
+    connection: ActiveConnection,
+    entry: RosterConfigEntry,
+    msg: dict[str, Any],
+) -> dict[str, Any]:
     data = RosterData.from_dict(msg["data"])
     await entry.runtime_data.async_replace(data)
     return data.to_dict()
 
 
-async def _set_exception(hass, connection, entry, msg) -> dict[str, Any]:
+async def _set_exception(
+    hass: HomeAssistant,
+    connection: ActiveConnection,
+    entry: RosterConfigEntry,
+    msg: dict[str, Any],
+) -> dict[str, Any]:
     payload = {
         "date": msg["date"],
         "assignment": msg["assignment"],
@@ -202,7 +234,12 @@ async def _set_exception(hass, connection, entry, msg) -> dict[str, Any]:
     return result.to_dict()
 
 
-async def _clear_exception(hass, connection, entry, msg) -> None:
+async def _clear_exception(
+    hass: HomeAssistant,
+    connection: ActiveConnection,
+    entry: RosterConfigEntry,
+    msg: dict[str, Any],
+) -> None:
     await entry.runtime_data.async_mutate(
         lambda data: data.clear_exception(msg["date"])
     )
@@ -211,19 +248,34 @@ async def _clear_exception(hass, connection, entry, msg) -> None:
 def _crud(hass: HomeAssistant, kind: str, schema: vol.Schema, plural: bool) -> None:
     """Register create, update and delete for one kind of item."""
 
-    async def create(hass, connection, entry, msg) -> dict[str, Any]:
+    async def create(
+        hass: HomeAssistant,
+        connection: ActiveConnection,
+        entry: RosterConfigEntry,
+        msg: dict[str, Any],
+    ) -> dict[str, Any]:
         result = await entry.runtime_data.async_mutate(
             lambda data: getattr(data, f"create_{kind}")(msg["item"])
         )
         return result.to_dict()
 
-    async def update(hass, connection, entry, msg) -> dict[str, Any]:
+    async def update(
+        hass: HomeAssistant,
+        connection: ActiveConnection,
+        entry: RosterConfigEntry,
+        msg: dict[str, Any],
+    ) -> dict[str, Any]:
         result = await entry.runtime_data.async_mutate(
             lambda data: getattr(data, f"update_{kind}")(msg["item_id"], msg["item"])
         )
         return result.to_dict()
 
-    async def delete(hass, connection, entry, msg) -> None:
+    async def delete(
+        hass: HomeAssistant,
+        connection: ActiveConnection,
+        entry: RosterConfigEntry,
+        msg: dict[str, Any],
+    ) -> None:
         args = (
             (msg["item_id"], msg.get("replace_with")) if plural else (msg["item_id"],)
         )
