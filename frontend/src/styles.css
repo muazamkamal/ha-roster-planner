@@ -498,3 +498,55 @@ input[type="checkbox"] {
   background: var(--card-background-color);
   border-bottom: 2px solid transparent;
 }
+
+.group-title {
+  margin: 8px 0 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.days-row.wide {
+  grid-template-columns: 72px minmax(0, 1fr);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+
+.days-unchanged {
+  padding-top: 12px;
+}
+
+.segmented.fit {
+  align-self: flex-start;
+  margin-left: 0;
+}
+
+.past {
+  margin-top: 8px;
+  opacity: 0.75;
+}
+
+.export {
+  width: 100%;
+  padding: 8px;
+  color: var(--primary-text-color);
+  font-family: monospace;
+  font-size: 12px;
+  background: var(--secondary-background-color, transparent);
+  border: 1px solid var(--divider-color);
+  border-radius: 8px;
+}
+
+.file-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-button input {
+  display: none;
+}

@@ -1,10 +1,13 @@
 import { useState } from "react";
 import type { ComponentType } from "react";
 import { useRoster } from "../hooks";
+import { Backup } from "./Backup";
+import { Exceptions } from "./Exceptions";
 import { Patterns } from "./Patterns";
 import { Rotations } from "./Rotations";
 import { ShiftTypes } from "./ShiftTypes";
 import { ICONS, Icon } from "./ui";
+import { Variations } from "./Variations";
 
 interface Screen {
   title: string;
@@ -16,6 +19,9 @@ const SCREENS: Screen[] = [
   { title: "Shift types", component: ShiftTypes },
   { title: "Week patterns", component: Patterns },
   { title: "Rotations", component: Rotations },
+  { title: "Variations", component: Variations },
+  { title: "Exceptions", component: Exceptions },
+  { title: "Backup", component: Backup, readOnly: true },
 ];
 
 export const SettingsList = () => {

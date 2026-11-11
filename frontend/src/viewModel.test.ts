@@ -1,10 +1,25 @@
 import { describe, expect, it } from "vitest";
-import type { DayDetail, Resolved, RosterException } from "./types";
+import type {
+  DayDetail,
+  Resolved,
+  RosterException,
+  Rotation,
+  ShiftType,
+  Variation,
+} from "./types";
 import {
   actionsFor,
+  byPriority,
+  describeAssignment,
+  firstOccurrence,
+  groupVariations,
   markerOf,
+  movedPriorities,
   nextShift,
   originLine,
+  recurringShift,
+  resizeSlots,
+  splitExceptions,
   summaryLine,
   timeRange,
 } from "./viewModel";
@@ -165,5 +180,138 @@ describe("nextShift and summaryLine", () => {
   });
   it("handles having nothing upcoming", () => {
     expect(summaryLine(null, start)).toBe("No upcoming shifts");
+  });
+});
+
+const open: ShiftType = {
+  id: "st1",
+  name: "Open",
+  start: "07:00",
+  end: "15:30",
+  colour: "#000000",
+};
+
+const rotation = (id: string, priority: number): Rotation => ({
+  id,
+  name: id,
+  anchor: "2026-11-16",
+  cycle_weeks: 1,
+  slots: [null],
+  active_from: "2026-11-16",
+  active_until: null,
+  priority,
+});
+
+describe("describeAssignment", () => {
+  it("treats a missing day as off", () => {
+    expect(describeAssignment(undefined, [])).toBe("Off");
+  });
+  it("names a shift type", () => {
+    expect(
+      describeAssignment({ type: "shift", shift_type_id: "st1" }, [open]),
+    ).toBe("Open");
+  });
+  it("shows custom times with a next-day marker", () => {
+    expect(
+      describeAssignment({ type: "custom", start: "22:00", end: "06:00" }, []),
+    ).toBe("Custom 22:00–06:00 (+1)");
+  });
+});
+
+describe("resizeSlots", () => {
+  it("pads with empty slots", () => {
+    expect(resizeSlots(["a"], 3)).toEqual(["a", null, null]);
+  });
+  it("truncates", () => {
+    expect(resizeSlots(["a", "b", "c"], 2)).toEqual(["a", "b"]);
+  });
+});
+
+describe("movedPriorities", () => {
+  const rotations = [rotation("a", 0), rotation("b", 5), rotation("c", 9)];
+
+  it("swaps with the neighbour and renumbers", () => {
+    expect(movedPriorities(rotations, "b", -1)).toEqual([
+      { id: "b", priority: 0 },
+      { id: "a", priority: 1 },
+      { id: "c", priority: 2 },
+    ]);
+  });
+  it("does nothing past either end", () => {
+    expect(movedPriorities(rotations, "a", -1)).toEqual([]);
+    expect(movedPriorities(rotations, "c", 1)).toEqual([]);
+  });
+  it("sorts by priority", () => {
+    expect(byPriority([rotation("z", 2), rotation("y", 1)])[0].id).toBe("y");
+  });
+});
+
+describe("recurringShift", () => {
+  it("finds the first matching weekday", () => {
+    expect(firstOccurrence("2026-11-16", "mon")).toBe("2026-11-16");
+    expect(firstOccurrence("2026-11-18", "mon")).toBe("2026-11-23");
+    expect(firstOccurrence("2026-11-16", "sun")).toBe("2026-11-22");
+  });
+
+  it("builds a single-day pattern and an N-week rotation", () => {
+    const built = recurringShift(2, "mon", open, "2026-11-16");
+    expect(built.pattern.days).toEqual({
+      mon: { type: "shift", shift_type_id: "st1" },
+    });
+    expect(built.rotation("p1")).toMatchObject({
+      anchor: "2026-11-16",
+      cycle_weeks: 2,
+      slots: ["p1", null],
+      active_from: "2026-11-16",
+    });
+  });
+
+  it("anchors on the week of the first occurrence, not the start date", () => {
+    const built = recurringShift(3, "mon", open, "2026-11-18");
+    expect(built.rotation("p1").anchor).toBe("2026-11-23");
+  });
+});
+
+describe("grouping", () => {
+  const variation = (id: string, start: string, end: string): Variation => ({
+    id,
+    name: id,
+    start_date: start,
+    end_date: end,
+    mode: "days",
+  });
+
+  it("groups variations around today, bounds inclusive", () => {
+    const groups = groupVariations(
+      [
+        variation("past", "2026-11-01", "2026-11-09"),
+        variation("ends-today", "2026-11-05", "2026-11-10"),
+        variation("starts-today", "2026-11-10", "2026-11-12"),
+        variation("next", "2026-11-11", "2026-11-20"),
+      ],
+      "2026-11-10",
+    );
+    expect(groups.past.map((item) => item.id)).toEqual(["past"]);
+    expect(groups.active.map((item) => item.id)).toEqual([
+      "ends-today",
+      "starts-today",
+    ]);
+    expect(groups.upcoming.map((item) => item.id)).toEqual(["next"]);
+  });
+
+  it("splits exceptions, soonest upcoming and latest past first", () => {
+    const at = (date: string): RosterException => ({
+      date,
+      assignment: { type: "off" },
+    });
+    const { upcoming, past } = splitExceptions(
+      [at("2026-11-12"), at("2026-11-01"), at("2026-11-10"), at("2026-11-05")],
+      "2026-11-10",
+    );
+    expect(upcoming.map((item) => item.date)).toEqual([
+      "2026-11-10",
+      "2026-11-12",
+    ]);
+    expect(past.map((item) => item.date)).toEqual(["2026-11-05", "2026-11-01"]);
   });
 });
