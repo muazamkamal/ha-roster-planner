@@ -43,25 +43,35 @@ export const AssignmentPicker = ({
         <option value={CUSTOM}>Custom times</option>
       </select>
       {value.type === "custom" && (
-        <div className="assignment-times">
+        <>
+          <div className="assignment-times">
+            <input
+              type="time"
+              aria-label="Start"
+              value={value.start}
+              onChange={(event) =>
+                onChange({ ...value, start: event.target.value })
+              }
+            />
+            <input
+              type="time"
+              aria-label="End"
+              value={value.end}
+              onChange={(event) =>
+                onChange({ ...value, end: event.target.value })
+              }
+            />
+            {value.end < value.start && <span className="muted">(+1)</span>}
+          </div>
           <input
-            type="time"
-            aria-label="Start"
-            value={value.start}
+            aria-label="Label"
+            placeholder="Label (optional)"
+            value={value.label ?? ""}
             onChange={(event) =>
-              onChange({ ...value, start: event.target.value })
+              onChange({ ...value, label: event.target.value || null })
             }
           />
-          <input
-            type="time"
-            aria-label="End"
-            value={value.end}
-            onChange={(event) =>
-              onChange({ ...value, end: event.target.value })
-            }
-          />
-          {value.end < value.start && <span className="muted">(+1)</span>}
-        </div>
+        </>
       )}
     </div>
   );

@@ -7541,7 +7541,7 @@ var T = n(), gt = s(), _t = [
 					children: "Custom times"
 				})
 			]
-		}), e.type === "custom" && /* @__PURE__ */ (0, A.jsxs)("div", {
+		}), e.type === "custom" && /* @__PURE__ */ (0, A.jsxs)(A.Fragment, { children: [/* @__PURE__ */ (0, A.jsxs)("div", {
 			className: "assignment-times",
 			children: [
 				/* @__PURE__ */ (0, A.jsx)("input", {
@@ -7567,7 +7567,15 @@ var T = n(), gt = s(), _t = [
 					children: "(+1)"
 				})
 			]
-		})]
+		}), /* @__PURE__ */ (0, A.jsx)("input", {
+			"aria-label": "Label",
+			placeholder: "Label (optional)",
+			value: e.label ?? "",
+			onChange: (t) => n({
+				...e,
+				label: t.target.value || null
+			})
+		})] })]
 	});
 }, j = {
 	menu: "M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z",
