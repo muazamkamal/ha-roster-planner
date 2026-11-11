@@ -48,7 +48,10 @@
       "name": "Set exception",
       "description": "Adds or changes a one-off shift on a date, or marks it as a day off.",
       "fields": {
-        "date": { "name": "Date", "description": "The date to change." },
+        "date": {
+          "name": "Date",
+          "description": "The date to change."
+        },
         "shift_type": {
           "name": "Shift type",
           "description": "Name of the shift type to work."
@@ -65,15 +68,34 @@
           "name": "Label",
           "description": "Name for a shift with custom times."
         },
-        "off": { "name": "Day off", "description": "Cancel the shift on this date." },
-        "note": { "name": "Note", "description": "Optional note." }
+        "off": {
+          "name": "Day off",
+          "description": "Cancel the shift on this date."
+        },
+        "note": {
+          "name": "Note",
+          "description": "Optional note."
+        }
       }
     },
     "clear_exception": {
       "name": "Clear exception",
       "description": "Removes a one-off change so the date follows the roster again.",
       "fields": {
-        "date": { "name": "Date", "description": "The date to reset." }
+        "date": {
+          "name": "Date",
+          "description": "The date to reset."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "next_shift_start": {
+        "name": "Next shift start"
+      },
+      "next_shift_end": {
+        "name": "Next shift end"
       }
     }
   }

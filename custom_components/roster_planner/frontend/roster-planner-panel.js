@@ -7272,7 +7272,7 @@ var T = n(), gt = s(), _t = [
 	let { api: n, config: r } = O(), [i, a] = (0, T.useState)(null);
 	return (0, T.useEffect)(() => {
 		let r = !0;
-		return n.resolve(e, t).then((e) => r && a(e)), () => {
+		return n.resolve(e, t).then((e) => r && a(e), () => void 0), () => {
 			r = !1;
 		};
 	}, [

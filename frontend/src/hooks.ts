@@ -86,7 +86,11 @@ export const useDays = (start: string, end: string): DayDetail[] | null => {
 
   useEffect(() => {
     let active = true;
-    api.resolve(start, end).then((result) => active && setDays(result));
+    // On failure (usually a dropped connection) keep showing the last result.
+    api.resolve(start, end).then(
+      (result) => active && setDays(result),
+      () => undefined,
+    );
     return () => {
       active = false;
     };

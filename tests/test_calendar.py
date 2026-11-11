@@ -1,12 +1,16 @@
 """Calendar entity, services, and lifecycle tests."""
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import Context, HomeAssistant
-from homeassistant.exceptions import ServiceValidationError, Unauthorized
+from homeassistant.exceptions import (
+    HomeAssistantError,
+    ServiceValidationError,
+    Unauthorized,
+)
 from homeassistant.util import dt as dt_util
 import pytest
 from pytest_homeassistant_custom_component.common import (
@@ -270,3 +274,140 @@ async def test_remove_entry_deletes_storage(hass: HomeAssistant, entry, hass_sto
     await hass.config_entries.async_remove(entry.entry_id)
     await hass.async_block_till_done()
     assert f"{DOMAIN}.{entry.entry_id}" not in hass_storage
+
+
+async def create(hass: HomeAssistant, **fields):
+    await hass.services.async_call(
+        CALENDAR_DOMAIN,
+        "create_event",
+        {"entity_id": ENTITY, "summary": "Training", **fields},
+        blocking=True,
+    )
+
+
+async def test_create_event_becomes_exception(hass: HomeAssistant, entry):
+    await add_roster(entry, {"mon": "open"})
+    await create(
+        hass,
+        start_date_time="2026-11-17 09:00:00",
+        end_date_time="2026-11-17 10:00:00",
+        description="Room 2",
+    )
+    exception = entry.runtime_data.data.exceptions[date(2026, 11, 17)]
+    assert exception.assignment.type == "custom"
+    assert exception.assignment.label == "Training"
+    assert exception.note == "Room 2"
+
+
+async def test_create_event_matching_shift_type_uses_it(hass: HomeAssistant, entry):
+    shift_type_id = await add_roster(entry, {"mon": "open"})
+    await create(
+        hass,
+        summary="Open",
+        start_date_time="2026-11-17 07:00:00",
+        end_date_time="2026-11-17 15:30:00",
+    )
+    exception = entry.runtime_data.data.exceptions[date(2026, 11, 17)]
+    assert exception.assignment.shift_type_id == shift_type_id
+
+
+async def test_create_event_crossing_midnight(hass: HomeAssistant, entry):
+    await create(
+        hass,
+        start_date_time="2026-11-17 22:00:00",
+        end_date_time="2026-11-18 06:00:00",
+    )
+    found = await events(hass, local(2026, 11, 18), local(2026, 11, 19))
+    assert found[0]["summary"] == "Training"
+
+
+@pytest.mark.parametrize(
+    "fields",
+    [
+        {"start_date": "2026-11-17", "end_date": "2026-11-18"},
+        {
+            "start_date_time": "2026-11-17 09:00:00",
+            "end_date_time": "2026-11-19 09:00:00",
+        },
+    ],
+)
+async def test_create_event_rejects_unsupported(hass: HomeAssistant, entry, fields):
+    with pytest.raises(HomeAssistantError):
+        await create(hass, **fields)
+    assert not entry.runtime_data.data.exceptions
+
+
+def calendar_entity(hass: HomeAssistant):
+    return hass.data[CALENDAR_DOMAIN].get_entity(ENTITY)
+
+
+def uid(entry, day: str) -> str:
+    return f"{entry.entry_id}-{day}"
+
+
+async def test_create_event_rejects_rrule(hass: HomeAssistant, entry):
+    with pytest.raises(HomeAssistantError):
+        await calendar_entity(hass).async_create_event(
+            dtstart=local(2026, 11, 17, 9),
+            dtend=local(2026, 11, 17, 10),
+            summary="x",
+            rrule="FREQ=WEEKLY",
+        )
+
+
+async def test_delete_rostered_event_marks_off(hass: HomeAssistant, entry):
+    await add_roster(entry, {"mon": "open"})
+    await calendar_entity(hass).async_delete_event(uid(entry, MONDAY))
+    assert await events(hass, local(2026, 11, 16), local(2026, 11, 17)) == []
+    assert entry.runtime_data.data.exceptions[date(2026, 11, 16)].assignment.type == (
+        "off"
+    )
+
+
+async def test_delete_extra_event_removes_exception(hass: HomeAssistant, entry):
+    await add_roster(entry, {"mon": "open"})
+    await create(
+        hass,
+        start_date_time="2026-11-17 09:00:00",
+        end_date_time="2026-11-17 10:00:00",
+    )
+    await calendar_entity(hass).async_delete_event(uid(entry, "2026-11-17"))
+    assert not entry.runtime_data.data.exceptions
+
+
+async def test_delete_rejects_foreign_uid_and_series(hass: HomeAssistant, entry):
+    entity = calendar_entity(hass)
+    with pytest.raises(HomeAssistantError):
+        await entity.async_delete_event("other-2026-11-16")
+    with pytest.raises(HomeAssistantError):
+        await entity.async_delete_event(
+            uid(entry, MONDAY), recurrence_range="THISANDFUTURE"
+        )
+
+
+async def test_update_event_changes_times(hass: HomeAssistant, entry):
+    await add_roster(entry, {"mon": "open"})
+    await calendar_entity(hass).async_update_event(
+        uid(entry, MONDAY),
+        {
+            "dtstart": local(2026, 11, 16, 8),
+            "dtend": local(2026, 11, 16, 12),
+            "summary": "Open",
+        },
+    )
+    found = await events(hass, local(2026, 11, 16), local(2026, 11, 17))
+    assert found[0]["start"].startswith("2026-11-16T08:00:00")
+
+
+async def test_update_event_moving_date_cancels_old_day(hass: HomeAssistant, entry):
+    await add_roster(entry, {"mon": "open"})
+    await calendar_entity(hass).async_update_event(
+        uid(entry, MONDAY),
+        {
+            "dtstart": local(2026, 11, 17, 7),
+            "dtend": local(2026, 11, 17, 15, 30),
+            "summary": "Open",
+        },
+    )
+    found = await events(hass, local(2026, 11, 16), local(2026, 11, 18))
+    assert [e["start"][:10] for e in found] == ["2026-11-17"]

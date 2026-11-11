@@ -25,7 +25,7 @@ from .const import (
 from .helpers import RosterConfigEntry
 from .store import RosterStore
 
-PLATFORMS = [Platform.CALENDAR]
+PLATFORMS = [Platform.CALENDAR, Platform.SENSOR]
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 DATA_PANEL_REGISTERED = f"{DOMAIN}_panel_registered"
 
