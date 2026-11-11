@@ -51,13 +51,18 @@ export const formatDay = (iso: string, pattern: string): string =>
   format(parseISO(iso), pattern);
 
 /** Today's date in a named timezone, which may differ from the browser's. */
-export const todayIn = (timeZone: string, now: Date = new Date()): string =>
-  new Intl.DateTimeFormat("en-CA", {
+export const todayIn = (timeZone: string, now: Date = new Date()): string => {
+  // Built from parts: a locale's own date layout is not guaranteed.
+  const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(now);
+  }).formatToParts(now);
+  const part = (type: string) =>
+    parts.find((item) => item.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")}`;
+};
 
 /**
  * The HH:MM of an ISO datetime as written. The API sends times in HA's zone, so

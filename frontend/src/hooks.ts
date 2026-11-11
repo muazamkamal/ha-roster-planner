@@ -54,6 +54,7 @@ export const useRosterList = () => {
 export const useRosterConfig = (entryId: string | null) => {
   const { connection } = useHass();
   const [config, setConfig] = useState<RosterConfig | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
   const api = useMemo(
     () => (entryId ? new RosterApi(connection, entryId) : null),
     [connection, entryId],
@@ -65,18 +66,32 @@ export const useRosterConfig = (entryId: string | null) => {
     let unsubscribe: (() => Promise<void>) | undefined;
     api
       .subscribe((next) => active && setConfig(next))
-      .then((stop) => {
-        if (active) unsubscribe = stop;
-        else void stop();
-      });
+      .then(
+        (stop) => {
+          if (active) unsubscribe = stop;
+          else void stop();
+        },
+        (err: ApiError) => active && setError(err),
+      );
     return () => {
       active = false;
       setConfig(null);
+      setError(null);
       void unsubscribe?.();
     };
   }, [api]);
 
-  return { api, config };
+  return { api, config, error };
+};
+
+/** The current time, refreshed often enough for "on shift until" to stay true. */
+export const useNow = (intervalMs = 30_000): number => {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), intervalMs);
+    return () => clearInterval(timer);
+  }, [intervalMs]);
+  return now;
 };
 
 /** Resolved days for a range, refetched whenever the rules change. */

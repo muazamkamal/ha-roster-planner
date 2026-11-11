@@ -50,17 +50,16 @@ export const Preview = ({
   if (error) return <p className="muted">Preview: {error.message}</p>;
   if (!days) return null;
 
+  // While a new range loads, the last result may cover fewer weeks.
   const rows = Array.from({ length: weeks }, (_, week) =>
     days.slice(week * 7, week * 7 + 7),
-  );
+  ).filter((row) => row.length > 0);
 
   return (
     <div className="preview" aria-label="Preview">
       {rows.map((row) => (
-        <div className="preview-row" key={row[0]?.date}>
-          <span className="muted">
-            {row[0] && formatDay(row[0].date, "d MMM")}
-          </span>
+        <div className="preview-row" key={row[0].date}>
+          <span className="muted">{formatDay(row[0].date, "d MMM")}</span>
           {row.map((day) => (
             <span
               key={day.date}

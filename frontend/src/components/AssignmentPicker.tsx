@@ -60,9 +60,7 @@ export const AssignmentPicker = ({
               onChange({ ...value, end: event.target.value })
             }
           />
-          {value.end <= value.start && value.end !== value.start && (
-            <span className="muted">(+1)</span>
-          )}
+          {value.end < value.start && <span className="muted">(+1)</span>}
         </div>
       )}
     </div>

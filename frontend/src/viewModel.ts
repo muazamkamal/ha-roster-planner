@@ -41,6 +41,22 @@ export interface DayActions {
   reset: boolean;
 }
 
+/** The assignment that reproduces a resolved shift, as a starting point for
+ * changing it: its shift type if one still matches, else its times. */
+export const assignmentOf = (
+  shift: Resolved,
+  shiftTypes: ShiftType[],
+): DayAssignment => {
+  const start = clockOf(shift.start);
+  const end = clockOf(shift.end);
+  const match = shiftTypes.find(
+    (item) =>
+      item.name === shift.title && item.start === start && item.end === end,
+  );
+  if (match) return { type: "shift", shift_type_id: match.id };
+  return { type: "custom", start, end, label: shift.title };
+};
+
 export const actionsFor = (day: DayDetail): DayActions => ({
   change: day.shift !== null,
   extra: day.shift === null,
@@ -115,7 +131,8 @@ export const resizeSlots = (
 export const byPriority = (rotations: Rotation[]): Rotation[] =>
   [...rotations].sort((a, b) => a.priority - b.priority);
 
-/** The priority updates that move one rotation up or down the list. */
+/** The priority updates that move one rotation up or down the list. Only the
+ * rotations whose priority actually changes are returned. */
 export const movedPriorities = (
   rotations: Rotation[],
   id: string,
@@ -126,7 +143,10 @@ export const movedPriorities = (
   const to = from + direction;
   if (from < 0 || to < 0 || to >= ordered.length) return [];
   [ordered[from], ordered[to]] = [ordered[to], ordered[from]];
-  return ordered.map((item, priority) => ({ id: item.id, priority }));
+  return ordered
+    .map((item, priority) => ({ id: item.id, priority, was: item.priority }))
+    .filter((item) => item.priority !== item.was)
+    .map(({ id, priority }) => ({ id, priority }));
 };
 
 /** First date on or after `start` falling on `weekday`. */

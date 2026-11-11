@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 import type { ApiError } from "../types";
 
@@ -48,19 +49,30 @@ export const Sheet = ({
   title: string;
   onClose: () => void;
   children: ReactNode;
-}) => (
-  <div className="sheet-backdrop" onClick={onClose}>
-    <div
-      className="sheet"
-      role="dialog"
-      aria-label={title}
-      onClick={(event) => event.stopPropagation()}
-    >
-      <h2>{title}</h2>
-      {children}
+}) => {
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div
+        className="sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <h2>{title}</h2>
+        {children}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const Confirm = ({
   title,

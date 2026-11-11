@@ -27,15 +27,23 @@ class RosterPlannerPanel extends HTMLElement {
   }
 
   connectedCallback() {
-    if (!this.shadowRoot) {
+    let container = this.shadowRoot?.querySelector("div");
+    if (!container) {
       const shadow = this.attachShadow({ mode: "open" });
       const style = document.createElement("style");
       style.textContent = styles;
-      const container = document.createElement("div");
+      container = document.createElement("div");
       shadow.append(style, container);
-      this.root = createRoot(container);
     }
+    this.root ??= createRoot(container);
     this.render();
+  }
+
+  // HA removes the panel when you navigate away. Unmounting ends the
+  // websocket subscription and timers, which would otherwise pile up.
+  disconnectedCallback() {
+    this.root?.unmount();
+    this.root = undefined;
   }
 
   private render() {

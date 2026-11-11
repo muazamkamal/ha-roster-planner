@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { formatDay, monthGrid, shiftDays, shiftMonths, weekOf } from "../dates";
-import { useDays, useRoster } from "../hooks";
+import { useDays, useNow, useRoster } from "../hooks";
 import type { DayDetail } from "../types";
 import { nextShift, summaryLine } from "../viewModel";
 import { MonthView, Swipeable, WeekView } from "./Calendar";
@@ -33,7 +33,7 @@ export const MainScreen = ({ narrow }: { narrow: boolean }) => {
         : shiftMonths(current, direction),
     );
 
-  const now = Date.now();
+  const now = useNow();
   const selectedDay = selected ? days.get(selected) : undefined;
   const heading =
     view === "week"

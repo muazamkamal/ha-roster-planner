@@ -9,6 +9,7 @@ import type {
 } from "./types";
 import {
   actionsFor,
+  assignmentOf,
   byPriority,
   describeAssignment,
   firstOccurrence,
@@ -237,6 +238,13 @@ describe("movedPriorities", () => {
       { id: "c", priority: 2 },
     ]);
   });
+  it("leaves out rotations whose priority stays the same", () => {
+    const tidy = [rotation("a", 0), rotation("b", 1), rotation("c", 2)];
+    expect(movedPriorities(tidy, "c", -1)).toEqual([
+      { id: "c", priority: 1 },
+      { id: "b", priority: 2 },
+    ]);
+  });
   it("does nothing past either end", () => {
     expect(movedPriorities(rotations, "a", -1)).toEqual([]);
     expect(movedPriorities(rotations, "c", 1)).toEqual([]);
@@ -313,5 +321,22 @@ describe("grouping", () => {
       "2026-11-12",
     ]);
     expect(past.map((item) => item.date)).toEqual(["2026-11-05", "2026-11-01"]);
+  });
+});
+
+describe("assignmentOf", () => {
+  it("uses the shift type when name and times still match", () => {
+    expect(assignmentOf(shift(), [open])).toEqual({
+      type: "shift",
+      shift_type_id: open.id,
+    });
+  });
+  it("falls back to the shift's own times", () => {
+    expect(assignmentOf(shift({ title: "Training" }), [open])).toEqual({
+      type: "custom",
+      start: "07:00",
+      end: "15:30",
+      label: "Training",
+    });
   });
 });

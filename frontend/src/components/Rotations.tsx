@@ -177,6 +177,10 @@ const Wizard = ({ onClose }: { onClose: () => void }) => {
       setError({ code: "required", message: "Add a shift type first" });
       return;
     }
+    if (!start) {
+      setError({ code: "required", message: "Choose a starting date" });
+      return;
+    }
     const built = recurringShift(everyWeeks, weekday, shiftType, start);
     const saved = await submit(async () => {
       const pattern = await api.create<{ id: string }>(
@@ -186,7 +190,8 @@ const Wizard = ({ onClose }: { onClose: () => void }) => {
       try {
         await api.create("rotation", built.rotation(pattern.id));
       } catch (err) {
-        await api.remove("pattern", pattern.id);
+        // Report the original failure even if tidying up fails too.
+        await api.remove("pattern", pattern.id).catch(() => undefined);
         throw err;
       }
     });

@@ -32,9 +32,11 @@ export const App = ({ narrow }: { narrow: boolean }) => {
   const root = useRef<HTMLDivElement>(null);
   const today = useToday(hass.config.time_zone);
 
-  const activeId = entryId ?? rosters?.[0]?.entry_id ?? null;
-  const { api, config } = useRosterConfig(activeId);
-  const roster = rosters?.find((item) => item.entry_id === activeId);
+  // Fall back to the first roster if the chosen one is no longer listed.
+  const roster =
+    rosters?.find((item) => item.entry_id === entryId) ?? rosters?.[0];
+  const activeId = roster?.entry_id ?? null;
+  const { api, config, error: configError } = useRosterConfig(activeId);
   const canEdit = roster?.can_edit ?? false;
 
   const context = useMemo(
@@ -85,7 +87,9 @@ export const App = ({ narrow }: { narrow: boolean }) => {
           />
         )}
       </header>
-      {error && <p className="error content">{error.message}</p>}
+      {(error ?? configError) && (
+        <p className="error content">{(error ?? configError)?.message}</p>
+      )}
       {rosters?.length === 0 && (
         <p className="content muted">
           Add a roster under Settings → Devices & services.

@@ -126,6 +126,10 @@ export const MonthView = ({
           key={date}
           className={classes.join(" ")}
           disabled={!day}
+          aria-label={
+            formatDay(date, "EEEE d MMMM") +
+            (day?.shift ? `, ${timeRange(day.shift)} ${day.shift.title}` : "")
+          }
           onClick={() => day && onSelect(day)}
         >
           <span className="month-number">

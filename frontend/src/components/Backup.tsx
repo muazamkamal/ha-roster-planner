@@ -21,7 +21,8 @@ export const Backup = () => {
       );
       link.download = `roster-${today}.json`;
       link.click();
-      URL.revokeObjectURL(link.href);
+      // Revoking straight away cancels the download in some browsers.
+      setTimeout(() => URL.revokeObjectURL(link.href), 10_000);
     });
 
   const choose = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -30,12 +31,14 @@ export const Backup = () => {
     if (!file) return;
     setImported(false);
     try {
-      setPending(JSON.parse(await file.text()));
+      const parsed: unknown = JSON.parse(await file.text());
+      if (typeof parsed !== "object" || parsed === null) throw new Error();
+      setPending(parsed);
       setError(null);
     } catch {
       setError({
         code: "invalid_json",
-        message: "That file is not valid JSON",
+        message: "That file is not a roster backup",
       });
     }
   };

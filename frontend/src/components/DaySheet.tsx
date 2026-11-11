@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { formatDay } from "../dates";
 import { useRoster, useSubmit } from "../hooks";
-import type { DayAssignment, DayDetail } from "../types";
-import { actionsFor, originLine, timeRange } from "../viewModel";
+import type { DayAssignment, DayDetail, ShiftType } from "../types";
+import { actionsFor, assignmentOf, originLine, timeRange } from "../viewModel";
 import { AssignmentPicker } from "./AssignmentPicker";
 import { Field, FormError, Sheet } from "./ui";
 
+/** Start editing from what the day already has, so a small change is small. */
 const initialAssignment = (
   day: DayDetail,
-  firstShiftTypeId: string | undefined,
+  shiftTypes: ShiftType[],
 ): DayAssignment => {
   const current = day.exception?.assignment;
   if (current && current.type !== "off") return current;
-  return firstShiftTypeId
-    ? { type: "shift", shift_type_id: firstShiftTypeId }
+  if (day.shift) return assignmentOf(day.shift, shiftTypes);
+  return shiftTypes[0]
+    ? { type: "shift", shift_type_id: shiftTypes[0].id }
     : { type: "custom", start: "09:00", end: "17:00" };
 };
 
@@ -29,7 +31,7 @@ export const DaySheet = ({
   const [editing, setEditing] = useState(false);
   const [note, setNote] = useState(day.exception?.note ?? "");
   const [assignment, setAssignment] = useState<DayAssignment>(() =>
-    initialAssignment(day, config.shift_types[0]?.id),
+    initialAssignment(day, config.shift_types),
   );
   const actions = actionsFor(day);
   const origin = originLine(day);
@@ -78,16 +80,25 @@ export const DaySheet = ({
       {canEdit && (
         <div className="actions">
           {editing ? (
-            <button
-              type="button"
-              className="button primary"
-              disabled={busy}
-              onClick={() =>
-                run(() => api.setException(day.date, assignment, note))
-              }
-            >
-              Save
-            </button>
+            <>
+              <button
+                type="button"
+                className="button primary"
+                disabled={busy}
+                onClick={() =>
+                  run(() => api.setException(day.date, assignment, note))
+                }
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                className="button"
+                onClick={() => setEditing(false)}
+              >
+                Cancel
+              </button>
+            </>
           ) : (
             <>
               {actions.change && (
@@ -133,6 +144,11 @@ export const DaySheet = ({
             </>
           )}
         </div>
+      )}
+      {!editing && (
+        <button type="button" className="button" onClick={onClose}>
+          Close
+        </button>
       )}
     </Sheet>
   );
