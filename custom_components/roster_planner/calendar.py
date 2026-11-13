@@ -116,7 +116,9 @@ def _assignment(
     # An exact id or name wins over a name that differs only by case.
     for matches in (
         lambda item: wanted in (item.id, item.name),
-        lambda item: wanted.casefold() == item.name.casefold(),
+        lambda item: (
+            item.name is not None and wanted.casefold() == item.name.casefold()
+        ),
     ):
         if found := next(filter(matches, shift_types), None):
             return {"type": "shift", "shift_type_id": found.id}
@@ -262,7 +264,7 @@ class RosterCalendarEntity(CalendarEntity):
     ) -> bool:
         """Return True if the event matches what the roster gives on the day."""
         base = engine.resolve_without_exception(day, data, tz)
-        title = (event.get("summary") or "").removeprefix(self._prefix)
+        title = self._event_base_title(event.get("summary") or "")
         return (
             base is not None
             and base.title == title
@@ -326,9 +328,7 @@ class RosterCalendarEntity(CalendarEntity):
         if not timedelta(0) < end - start < timedelta(days=1):
             raise HomeAssistantError("A shift must be shorter than 24 hours")
         start_time, end_time = start.strftime("%H:%M"), end.strftime("%H:%M")
-        title = event.get("summary") or ""
-        if self._prefix:
-            title = title.removeprefix(self._prefix)
+        title = self._event_base_title(event.get("summary") or "")
         return {
             "date": start.date(),
             "assignment": self._assignment_for(title, start_time, end_time),
@@ -338,7 +338,11 @@ class RosterCalendarEntity(CalendarEntity):
     def _assignment_for(self, title: str, start: str, end: str) -> dict[str, Any]:
         """Use the matching shift type if there is one, to keep its colour."""
         for shift_type in self.store.data.shift_types.values():
-            if (shift_type.name, shift_type.start, shift_type.end) == (
+            if (
+                shift_type.name or self.store.data.default_shift_name,
+                shift_type.start,
+                shift_type.end,
+            ) == (
                 title,
                 start,
                 end,
@@ -346,11 +350,29 @@ class RosterCalendarEntity(CalendarEntity):
                 return {"type": "shift", "shift_type_id": shift_type.id}
         return {"type": "custom", "start": start, "end": end, "label": title}
 
+    def _event_base_title(self, title: str) -> str:
+        """Remove the integration prefix and generated status suffix from a title."""
+        title = title.removeprefix(self._prefix)
+        for suffix in (" (Changed)", " (OT)", " (Variation)"):
+            if title.endswith(suffix):
+                return title.removesuffix(suffix)
+        return title
+
+    @staticmethod
+    def _event_suffix(shift: engine.Resolved) -> str:
+        if shift.flag == "extra":
+            return " (OT)"
+        if shift.flag == "changed":
+            return " (Changed)"
+        if shift.source == "variation":
+            return " (Variation)"
+        return ""
+
     def _to_event(self, shift: engine.Resolved) -> CalendarEvent:
         return CalendarEvent(
             start=shift.start,
             end=shift.end,
-            summary=f"{self._prefix}{shift.title}",
+            summary=f"{self._prefix}{shift.title}{self._event_suffix(shift)}",
             description=_describe(shift),
             location=self._location,
             uid=f"{self.entry.entry_id}-{shift.date.isoformat()}",

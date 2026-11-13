@@ -26,7 +26,7 @@ Each roster is one integration entry, so add a second entry for a second person.
 
 Open **Roster**, tap the gear, then work down the list:
 
-1. **Shift types**: the shifts you work, such as "Open 07:00–15:30". An end time at or before the start means the shift ends the next day.
+1. **Shift types**: the shifts you work, such as "Open 07:00–15:30". A shift name is optional; unnamed shift types and custom shifts use the default shift name configured under **Settings → Shift naming**. An end time at or before the start means the shift ends the next day.
 2. **Week patterns**: a Monday-to-Sunday template. Use **Duplicate** for weeks that are nearly the same.
 3. **Rotations**: a cycle of 1–12 weeks, one pattern per week, counted from a Monday. **Quick add: recurring shift** handles cases like "every 2 weeks on Monday".
 4. **Variations**: a date range that temporarily replaces the rotation, either with another pattern or by editing specific weekdays. The rotation resumes by itself afterwards.
@@ -56,6 +56,8 @@ Automations can always use the services below.
 | `sensor.<name>_next_shift_end` | When the current or next shift ends. |
 
 The calendar can also be edited from the stock Calendar screen or `calendar.create_event`. Those edits are saved as one-off exceptions. Repeating and all-day events are rejected, and a shift must be shorter than 24 hours.
+
+Event titles use the shift name (or default name) and append **(Changed)** for changed shifts, **(OT)** for extra shifts, or **(Variation)** for shifts supplied by a variation. Ordinary rotation shifts have no suffix.
 
 `roster_planner.set_exception` takes a `date` and exactly one of `shift_type`, `start` and `end`, or `off`, plus an optional `note`. With only a `note`, the date keeps its rostered shift. `roster_planner.clear_exception` takes a `date`.
 

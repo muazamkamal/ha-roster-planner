@@ -31,12 +31,31 @@ def expect(code, field, func, *args):
         ({"start": "7:00"}, "invalid_time", "start"),
         ({"end": "07:00"}, "invalid_time_range", "end"),
         ({"colour": "red"}, "invalid_colour", "colour"),
-        ({"name": "  "}, "invalid_name", "name"),
-        ({"name": None}, "required", "name"),
+        ({"name": 1}, "invalid_format", "name"),
     ],
 )
 def test_shift_type_validation(change, code, field):
     expect(code, field, RosterData().create_shift_type, {**SHIFT, **change})
+
+
+@pytest.mark.parametrize("name", [None, "", "  "])
+def test_shift_type_name_is_optional(name):
+    shift_type = RosterData().create_shift_type({**SHIFT, "name": name})
+    assert shift_type.name is None
+
+
+def test_default_shift_name_round_trips_and_can_be_changed():
+    data = RosterData()
+    assert data.to_dict()["default_shift_name"] == "Shift"
+    data.set_default_shift_name("Work")
+    assert RosterData.from_dict(data.to_dict()).default_shift_name == "Work"
+    data.set_default_shift_name("")
+    assert data.default_shift_name == "Shift"
+
+
+def test_old_backup_without_default_shift_name_uses_legacy_default():
+    data = RosterData.from_dict({"shift_types": [SHIFT]})
+    assert data.default_shift_name == "Shift"
 
 
 @pytest.mark.parametrize(

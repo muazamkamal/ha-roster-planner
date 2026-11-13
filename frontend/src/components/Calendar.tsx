@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import type { ReactNode, TouchEvent } from "react";
 import { clockOf, formatDay, monthGrid, sameMonth, weekOf } from "../dates";
-import type { DayDetail } from "../types";
+import type { DayDetail, TimeFormat } from "../types";
 import { markerOf, timeRange } from "../viewModel";
 
 const SWIPE_DISTANCE = 60;
@@ -56,9 +56,18 @@ interface ViewProps {
   today: string;
   days: Map<string, DayDetail>;
   onSelect: (day: DayDetail) => void;
+  timeFormat: TimeFormat;
+  timeLocale: string;
 }
 
-export const WeekView = ({ anchor, today, days, onSelect }: ViewProps) => (
+export const WeekView = ({
+  anchor,
+  today,
+  days,
+  onSelect,
+  timeFormat,
+  timeLocale,
+}: ViewProps) => (
   <div className="week">
     {weekOf(anchor).map((date) => {
       const day = days.get(date);
@@ -86,7 +95,7 @@ export const WeekView = ({ anchor, today, days, onSelect }: ViewProps) => (
                 style={{ background: day.shift.colour }}
               />
               <span className="week-shift">
-                <strong>{timeRange(day.shift)}</strong>
+                <strong>{timeRange(day.shift, timeFormat, timeLocale)}</strong>
                 <span className="muted">{day.shift.title}</span>
               </span>
             </>
@@ -106,6 +115,8 @@ export const MonthView = ({
   days,
   onSelect,
   narrow,
+  timeFormat,
+  timeLocale,
 }: ViewProps & { narrow: boolean }) => (
   <div className="month">
     {weekOf(anchor).map((date) => (
@@ -129,7 +140,9 @@ export const MonthView = ({
           disabled={!day}
           aria-label={
             formatDay(date, "EEEE d MMMM") +
-            (day?.shift ? `, ${timeRange(day.shift)} ${day.shift.title}` : "")
+            (day?.shift
+              ? `, ${timeRange(day.shift, timeFormat, timeLocale)} ${day.shift.title}`
+              : "")
           }
           onClick={() => day && onSelect(day)}
         >
@@ -148,7 +161,7 @@ export const MonthView = ({
                 className="month-time"
                 style={{ borderColor: day.shift.colour }}
               >
-                {clockOf(day.shift.start)}
+                {clockOf(day.shift.start, timeFormat, timeLocale)}
               </span>
             ))}
         </button>

@@ -79,6 +79,13 @@ async def test_get_empty(api: Api):
     result = await api.call("get")
     assert result["shift_types"] == []
     assert result["version"] == 1
+    assert result["default_shift_name"] == "Shift"
+
+
+async def test_set_default_shift_name(api: Api):
+    await api.call("default_shift_name/set", name="Work")
+    assert (await api.call("get"))["default_shift_name"] == "Work"
+    assert await api.error("default_shift_name/set", name=1)
 
 
 async def test_unknown_roster(api: Api):

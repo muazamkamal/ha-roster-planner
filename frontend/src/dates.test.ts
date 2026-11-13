@@ -3,6 +3,7 @@ import {
   clockOf,
   crossesMidnight,
   endsNextDay,
+  formatClock,
   isMonday,
   mondayOf,
   monthGrid,
@@ -61,6 +62,12 @@ describe("dates", () => {
 
   it("reads the wall clock off an ISO string, ignoring the browser", () => {
     expect(clockOf("2026-11-16T07:00:00+08:00")).toBe("07:00");
+  });
+
+  it("formats times using the selected Home Assistant time format", () => {
+    expect(clockOf("2026-11-16T07:00:00+08:00", "12", "en-US")).toBe("7:00 AM");
+    expect(formatClock("18:30", "12", "en-US")).toBe("6:30 PM");
+    expect(formatClock("18:30", "24", "en-US")).toBe("18:30");
   });
 
   it("detects shifts crossing midnight", () => {

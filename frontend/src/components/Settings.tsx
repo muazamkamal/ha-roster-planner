@@ -6,7 +6,8 @@ import { Exceptions } from "./Exceptions";
 import { Patterns } from "./Patterns";
 import { Rotations } from "./Rotations";
 import { ShiftTypes } from "./ShiftTypes";
-import { ICONS, Icon } from "./ui";
+import { ShiftNaming } from "./ShiftNaming";
+import { ICONS, Icon, Sheet } from "./ui";
 import { Variations } from "./Variations";
 
 interface Screen {
@@ -16,6 +17,7 @@ interface Screen {
 }
 
 const SCREENS: Screen[] = [
+  { title: "Shift naming", component: ShiftNaming },
   { title: "Shift types", component: ShiftTypes },
   { title: "Week patterns", component: Patterns },
   { title: "Rotations", component: Rotations },
@@ -24,49 +26,48 @@ const SCREENS: Screen[] = [
   { title: "Backup", component: Backup, readOnly: true },
 ];
 
-export const SettingsList = () => {
+export const SettingsList = ({ onClose }: { onClose: () => void }) => {
   const { canEdit } = useRoster();
   const [open, setOpen] = useState<Screen | null>(null);
   const screens = SCREENS.filter((screen) => canEdit || screen.readOnly);
-
-  if (open) {
-    const Component = open.component;
-    return (
-      <main className="content">
-        <button
-          type="button"
-          className="breadcrumb"
-          onClick={() => setOpen(null)}
-        >
-          <Icon path={ICONS.left} /> Settings
-        </button>
-        <h3 className="screen-title">{open.title}</h3>
-        <Component />
-      </main>
-    );
-  }
+  const Component = open?.component;
 
   return (
-    <main className="content">
-      {!canEdit && (
-        <p className="muted screen-title">
-          You can view this roster but not change it.
-        </p>
+    <Sheet title={open?.title ?? "Settings"} onClose={onClose} wide>
+      {Component ? (
+        <>
+          <button
+            type="button"
+            className="breadcrumb"
+            onClick={() => setOpen(null)}
+          >
+            <Icon path={ICONS.left} /> Settings
+          </button>
+          <Component />
+        </>
+      ) : (
+        <>
+          {!canEdit && (
+            <p className="muted screen-title">
+              You can view this roster but not change it.
+            </p>
+          )}
+          <ul className="list">
+            {screens.map((screen) => (
+              <li key={screen.title}>
+                <button
+                  type="button"
+                  className="list-main"
+                  onClick={() => setOpen(screen)}
+                >
+                  <span>{screen.title}</span>
+                  <Icon path={ICONS.right} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
-      <ul className="list">
-        {screens.map((screen) => (
-          <li key={screen.title}>
-            <button
-              type="button"
-              className="list-main"
-              onClick={() => setOpen(screen)}
-            >
-              <span>{screen.title}</span>
-              <Icon path={ICONS.right} />
-            </button>
-          </li>
-        ))}
-      </ul>
-    </main>
+    </Sheet>
   );
 };

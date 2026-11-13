@@ -23,6 +23,7 @@ MAX_CYCLE_WEEKS = 12
 _TIME_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _COLOUR_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
+DEFAULT_SHIFT_NAME = "Shift"
 
 
 class ValidationError(Exception):
@@ -118,10 +119,10 @@ def _list_of_dicts(payload: dict[str, Any], key: str) -> list[dict[str, Any]]:
 
 @dataclass
 class ShiftType:
-    """A named shift with fixed times. ``end <= start`` means it ends the next day."""
+    """A shift with fixed times and an optional name."""
 
     id: str
-    name: str
+    name: str | None
     start: str
     end: str
     colour: str = "#2196f3"
@@ -138,7 +139,7 @@ class ShiftType:
             raise ValidationError("invalid_colour", "Use #RRGGBB", "colour")
         return cls(
             id=_id(payload),
-            name=_name(payload),
+            name=_text(payload, "name"),
             start=start,
             end=end,
             colour=colour,
@@ -434,6 +435,7 @@ class RosterException:
 class RosterData:
     """Everything stored for one roster."""
 
+    default_shift_name: str = DEFAULT_SHIFT_NAME
     shift_types: dict[str, ShiftType] = field(default_factory=dict)
     patterns: dict[str, WeekPattern] = field(default_factory=dict)
     rotations: dict[str, Rotation] = field(default_factory=dict)
@@ -453,6 +455,9 @@ class RosterData:
                 "unsupported_version", f"Unsupported version {version}", "version"
             )
         data = cls()
+        data.default_shift_name = (
+            _text(payload, "default_shift_name") or DEFAULT_SHIFT_NAME
+        )
         for key, target, parser in (
             ("shift_types", data.shift_types, ShiftType.from_dict),
             ("patterns", data.patterns, WeekPattern.from_dict),
@@ -482,6 +487,7 @@ class RosterData:
         """Serialise the whole roster."""
         return {
             "version": SCHEMA_VERSION,
+            "default_shift_name": self.default_shift_name,
             "shift_types": [i.to_dict() for i in self.shift_types.values()],
             "patterns": [i.to_dict() for i in self.patterns.values()],
             "rotations": [i.to_dict() for i in self.rotations.values()],
@@ -494,6 +500,13 @@ class RosterData:
     def copy(self) -> RosterData:
         """Return an independent copy."""
         return copy.deepcopy(self)
+
+    def set_default_shift_name(self, name: str) -> None:
+        """Set the fallback name, using the built-in value when left blank."""
+        self.default_shift_name = (
+            _text({"default_shift_name": name}, "default_shift_name")
+            or DEFAULT_SHIFT_NAME
+        )
 
     # Lookups used by the engine
 

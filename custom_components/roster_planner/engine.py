@@ -13,9 +13,14 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta, tzinfo
 
-from .models import WEEKDAYS, DayAssignment, RosterData, RosterException
+from .models import (
+    DEFAULT_SHIFT_NAME,
+    WEEKDAYS,
+    DayAssignment,
+    RosterData,
+    RosterException,
+)
 
-DEFAULT_TITLE = "Shift"
 DEFAULT_COLOUR = "#2196f3"
 LOOKAHEAD_DAYS = 60
 
@@ -122,10 +127,13 @@ def _to_resolved(
     if assignment.type == "shift":
         shift_type = data.shift_types[assignment.shift_type_id or ""]
         start, end = shift_type.start, shift_type.end
-        title, colour = shift_type.name, shift_type.colour
+        title, colour = shift_type.name or data.default_shift_name, shift_type.colour
     else:
         start, end = assignment.start or "", assignment.end or ""
-        title, colour = assignment.label or DEFAULT_TITLE, DEFAULT_COLOUR
+        title, colour = (
+            assignment.label or data.default_shift_name or DEFAULT_SHIFT_NAME,
+            DEFAULT_COLOUR,
+        )
     start_at, end_at = _shift_bounds(day, start, end, tz)
     return Resolved(
         date=day,

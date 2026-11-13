@@ -181,7 +181,13 @@ const Wizard = ({ onClose }: { onClose: () => void }) => {
       setError({ code: "required", message: "Choose a starting date" });
       return;
     }
-    const built = recurringShift(everyWeeks, weekday, shiftType, start);
+    const built = recurringShift(
+      everyWeeks,
+      weekday,
+      shiftType,
+      start,
+      config.default_shift_name,
+    );
     const saved = await submit(async () => {
       const pattern = await api.create<{ id: string }>(
         "pattern",

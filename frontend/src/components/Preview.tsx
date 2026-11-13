@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { clockOf, formatDay, shiftDays } from "../dates";
-import { useRoster } from "../hooks";
+import { useHass, useRoster } from "../hooks";
 import type { ApiError, DayDetail } from "../types";
 
 const DEBOUNCE_MS = 300;
@@ -18,6 +18,9 @@ export const Preview = ({
   weeks: number;
 }) => {
   const { api, config } = useRoster();
+  const { locale } = useHass();
+  const timeFormat = locale?.time_format ?? "24";
+  const timeLocale = locale?.language ?? "en";
   const [days, setDays] = useState<DayDetail[] | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const serialised = JSON.stringify(draft);
@@ -71,7 +74,9 @@ export const Preview = ({
               }
               title={day.date}
             >
-              {day.shift ? clockOf(day.shift.start) : "–"}
+              {day.shift
+                ? clockOf(day.shift.start, timeFormat, timeLocale)
+                : "–"}
             </span>
           ))}
         </div>

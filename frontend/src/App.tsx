@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MainScreen } from "./components/MainScreen";
 import { SettingsList } from "./components/Settings";
 import { ICONS, IconButton } from "./components/ui";
 import { todayIn } from "./dates";
+import type { Hass } from "./types";
 import {
   RosterContext,
   useHass,
@@ -28,8 +29,7 @@ export const App = ({ narrow }: { narrow: boolean }) => {
   const hass = useHass();
   const { rosters, error } = useRosterList();
   const [entryId, setEntryId] = useState<string | null>(null);
-  const [inSettings, setInSettings] = useState(false);
-  const root = useRef<HTMLDivElement>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const today = useToday(hass.config.time_zone);
 
   // Fall back to the first roster if the chosen one is no longer listed.
@@ -44,25 +44,25 @@ export const App = ({ narrow }: { narrow: boolean }) => {
     [api, config, canEdit, today],
   );
 
-  const toggleMenu = () =>
-    root.current?.dispatchEvent(
-      new CustomEvent("hass-toggle-menu", { bubbles: true, composed: true }),
-    );
+  const setAppBar = useCallback(
+    (element: (HTMLElement & { narrow: boolean }) | null) => {
+      if (element) element.narrow = narrow;
+    },
+    [narrow],
+  );
+  const setMenuButton = useCallback(
+    (element: (HTMLElement & { hass: Hass; narrow: boolean }) | null) => {
+      if (!element) return;
+      element.hass = hass;
+      element.narrow = narrow;
+    },
+    [hass, narrow],
+  );
 
   return (
-    <div className="app" ref={root}>
-      <header className="header">
-        {inSettings ? (
-          <IconButton
-            path={ICONS.back}
-            label="Back"
-            onClick={() => setInSettings(false)}
-          />
-        ) : (
-          narrow && (
-            <IconButton path={ICONS.menu} label="Menu" onClick={toggleMenu} />
-          )
-        )}
+    <ha-top-app-bar-fixed ref={setAppBar}>
+      <ha-menu-button slot="navigationIcon" ref={setMenuButton} />
+      <div slot="title">
         {rosters && rosters.length > 1 ? (
           <select
             className="roster-switcher"
@@ -77,16 +77,17 @@ export const App = ({ narrow }: { narrow: boolean }) => {
             ))}
           </select>
         ) : (
-          <h1>{roster?.title ?? "Roster"}</h1>
+          (roster?.title ?? "Roster")
         )}
-        {!inSettings && context && (
-          <IconButton
-            path={ICONS.gear}
-            label="Settings"
-            onClick={() => setInSettings(true)}
-          />
-        )}
-      </header>
+      </div>
+      {context && (
+        <IconButton
+          path={ICONS.gear}
+          label="Settings"
+          slot="actionItems"
+          onClick={() => setShowSettings(true)}
+        />
+      )}
       {(error ?? configError) && (
         <p className="error content">{(error ?? configError)?.message}</p>
       )}
@@ -97,9 +98,12 @@ export const App = ({ narrow }: { narrow: boolean }) => {
       )}
       {context && (
         <RosterContext.Provider value={context}>
-          {inSettings ? <SettingsList /> : <MainScreen narrow={narrow} />}
+          <MainScreen narrow={narrow} />
+          {showSettings && (
+            <SettingsList onClose={() => setShowSettings(false)} />
+          )}
         </RosterContext.Provider>
       )}
-    </div>
+    </ha-top-app-bar-fixed>
   );
 };

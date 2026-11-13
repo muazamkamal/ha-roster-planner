@@ -245,6 +245,17 @@ async def _clear_exception(
     )
 
 
+async def _set_default_shift_name(
+    hass: HomeAssistant,
+    connection: ActiveConnection,
+    entry: RosterConfigEntry,
+    msg: dict[str, Any],
+) -> None:
+    await entry.runtime_data.async_mutate(
+        lambda data: data.set_default_shift_name(msg["name"])
+    )
+
+
 def _crud(hass: HomeAssistant, kind: str, schema: vol.Schema, plural: bool) -> None:
     """Register create, update and delete for one kind of item."""
 
@@ -340,6 +351,13 @@ def async_setup(hass: HomeAssistant) -> None:
         _preview,
     )
     _register(hass, "import", {vol.Required("data"): dict}, _import, mutation=True)
+    _register(
+        hass,
+        "default_shift_name/set",
+        {vol.Required("name"): str},
+        _set_default_shift_name,
+        mutation=True,
+    )
 
     _crud(hass, "shift_type", SHIFT_TYPE, plural=True)
     _crud(hass, "pattern", PATTERN, plural=True)

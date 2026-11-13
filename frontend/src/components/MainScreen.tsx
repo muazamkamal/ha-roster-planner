@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { formatDay, monthGrid, shiftDays, shiftMonths, weekOf } from "../dates";
-import { useDays, useNow, useRoster } from "../hooks";
+import { useDays, useHass, useNow, useRoster } from "../hooks";
 import type { DayDetail } from "../types";
 import { nextShift, summaryLine } from "../viewModel";
 import { MonthView, Swipeable, WeekView } from "./Calendar";
@@ -11,6 +11,9 @@ const LOOKAHEAD_DAYS = 60;
 
 export const MainScreen = ({ narrow }: { narrow: boolean }) => {
   const { today } = useRoster();
+  const { locale } = useHass();
+  const timeFormat = locale?.time_format ?? "24";
+  const timeLocale = locale?.language ?? "en";
   const [view, setView] = useState<"week" | "month">(narrow ? "week" : "month");
   const [anchor, setAnchor] = useState(today);
   const [selected, setSelected] = useState<string | null>(null);
@@ -44,7 +47,9 @@ export const MainScreen = ({ narrow }: { narrow: boolean }) => {
   return (
     <main className="content">
       {upcoming && (
-        <p className="summary">{summaryLine(nextShift(upcoming, now), now)}</p>
+        <p className="summary">
+          {summaryLine(nextShift(upcoming, now), now, timeFormat, timeLocale)}
+        </p>
       )}
       <div className="toolbar">
         <IconButton
@@ -81,6 +86,8 @@ export const MainScreen = ({ narrow }: { narrow: boolean }) => {
             today={today}
             days={days}
             onSelect={onSelect}
+            timeFormat={timeFormat}
+            timeLocale={timeLocale}
           />
         ) : (
           <MonthView
@@ -89,6 +96,8 @@ export const MainScreen = ({ narrow }: { narrow: boolean }) => {
             days={days}
             onSelect={onSelect}
             narrow={narrow}
+            timeFormat={timeFormat}
+            timeLocale={timeLocale}
           />
         )}
       </Swipeable>

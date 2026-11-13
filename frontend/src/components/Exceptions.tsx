@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { formatDay } from "../dates";
-import { useRoster, useSubmit } from "../hooks";
+import { useHass, useRoster, useSubmit } from "../hooks";
 import type { RosterException } from "../types";
 import { describeException, splitExceptions } from "../viewModel";
 import { Confirm, FormError } from "./ui";
@@ -13,13 +13,20 @@ const Row = ({
   onRemove: (item: RosterException) => void;
 }) => {
   const { config } = useRoster();
+  const { locale } = useHass();
   return (
     <li>
       <span className="list-main">
         <span>
           {formatDay(item.date, "EEE d MMM yyyy")}
           <span className="muted list-detail">
-            {describeException(item, config.shift_types)}
+            {describeException(
+              item,
+              config.shift_types,
+              locale?.time_format ?? "24",
+              locale?.language ?? "en",
+              config.default_shift_name,
+            )}
           </span>
         </span>
       </span>

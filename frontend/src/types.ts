@@ -12,7 +12,7 @@ export const WEEKDAYS: Weekday[] = [
 
 export interface ShiftType {
   id: string;
-  name: string;
+  name: string | null;
   start: string;
   end: string;
   colour: string;
@@ -63,6 +63,7 @@ export interface RosterException {
 
 export interface RosterConfig {
   version: number;
+  default_shift_name: string;
   shift_types: ShiftType[];
   patterns: WeekPattern[];
   rotations: Rotation[];
@@ -117,4 +118,10 @@ export interface HassConnection {
 export interface Hass {
   connection: HassConnection;
   config: { time_zone: string };
+  locale?: {
+    language?: string;
+    time_format?: "12" | "24" | "language";
+  };
 }
+
+export type TimeFormat = "12" | "24" | "language";

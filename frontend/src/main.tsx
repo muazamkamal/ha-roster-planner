@@ -11,11 +11,13 @@ class RosterPlannerPanel extends HTMLElement {
   private currentNarrow = false;
 
   // HA sets hass on every state change anywhere in the system. Only the
-  // connection and timezone matter here, so other updates skip the re-render.
+  // connection, timezone, and display format matter here.
   set hass(value: Hass) {
     const changed =
       this.currentHass?.connection !== value.connection ||
-      this.currentHass?.config.time_zone !== value.config.time_zone;
+      this.currentHass?.config.time_zone !== value.config.time_zone ||
+      this.currentHass?.locale?.time_format !== value.locale?.time_format ||
+      this.currentHass?.locale?.language !== value.locale?.language;
     this.currentHass = value;
     if (changed) this.render();
   }

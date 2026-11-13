@@ -181,6 +181,7 @@ async def test_set_exception_with_shift_type_name(hass: HomeAssistant, entry):
         blocking=True,
     )
     found = await events(hass, local(2026, 11, 17), local(2026, 11, 18))
+    assert found[0]["summary"] == "Open (OT)"
     assert found[0]["description"] == "Extra shift"
 
 
@@ -200,7 +201,7 @@ async def test_set_exception_custom_then_clear(hass: HomeAssistant, entry):
         blocking=True,
     )
     found = await events(hass, local(2026, 11, 16), local(2026, 11, 17))
-    assert found[0]["summary"] == "Training"
+    assert found[0]["summary"] == "Training (Changed)"
     assert found[0]["description"] == "Changed shift\nRoom 2"
     await hass.services.async_call(
         DOMAIN,
@@ -210,6 +211,66 @@ async def test_set_exception_custom_then_clear(hass: HomeAssistant, entry):
     )
     found = await events(hass, local(2026, 11, 16), local(2026, 11, 17))
     assert found[0]["summary"] == "Open"
+
+
+async def test_variation_event_has_suffix(hass: HomeAssistant, entry):
+    shift_type_id = await add_roster(entry, {"mon": "open"})
+    await entry.runtime_data.async_mutate(
+        lambda data: data.create_variation(
+            {
+                "name": "Training week",
+                "start_date": MONDAY,
+                "end_date": MONDAY,
+                "mode": "days",
+                "days": {
+                    "mon": {
+                        "type": "shift",
+                        "shift_type_id": shift_type_id,
+                    }
+                },
+            }
+        )
+    )
+    found = await events(hass, local(2026, 11, 16), local(2026, 11, 17))
+    assert found[0]["summary"] == "Open (Variation)"
+
+
+async def test_unnamed_shift_uses_default_name_in_event(hass: HomeAssistant, entry):
+    shift_type_id = await add_roster(entry, {"mon": "open"})
+    await entry.runtime_data.async_mutate(
+        lambda data: (
+            data.update_shift_type(shift_type_id, {"name": None}),
+            data.set_default_shift_name("Work"),
+        )
+    )
+    found = await events(hass, local(2026, 11, 16), local(2026, 11, 17))
+    assert found[0]["summary"] == "Work"
+
+
+async def test_unlabelled_custom_shifts_use_default_name_in_events(
+    hass: HomeAssistant, entry
+):
+    await add_roster(entry, {"mon": "open"})
+    await entry.runtime_data.async_mutate(
+        lambda data: data.set_default_shift_name("Work")
+    )
+    for day in (MONDAY, "2026-11-17"):
+        await hass.services.async_call(
+            DOMAIN,
+            "set_exception",
+            {
+                "entity_id": ENTITY,
+                "date": day,
+                "start": "09:00",
+                "end": "10:00",
+            },
+            blocking=True,
+        )
+
+    changed = await events(hass, local(2026, 11, 16), local(2026, 11, 17))
+    extra = await events(hass, local(2026, 11, 17), local(2026, 11, 18))
+    assert changed[0]["summary"] == "Work (Changed)"
+    assert extra[0]["summary"] == "Work (OT)"
 
 
 @pytest.mark.parametrize(
@@ -318,7 +379,7 @@ async def test_create_event_crossing_midnight(hass: HomeAssistant, entry):
         end_date_time="2026-11-18 06:00:00",
     )
     found = await events(hass, local(2026, 11, 18), local(2026, 11, 19))
-    assert found[0]["summary"] == "Training"
+    assert found[0]["summary"] == "Training (OT)"
 
 
 @pytest.mark.parametrize(
@@ -442,14 +503,22 @@ async def test_update_event_description_only_keeps_roster(hass: HomeAssistant, e
     assert not entry.runtime_data.data.exceptions
     await entity.async_update_event(
         uid(entry, MONDAY),
-        {**unchanged, "description": "Main roster · Week 1\nBring keys"},
+        {
+            **unchanged,
+            "summary": "Open (Changed)",
+            "description": "Main roster · Week 1\nBring keys",
+        },
     )
     exception = entry.runtime_data.data.exceptions[date(2026, 11, 16)]
     assert (exception.assignment, exception.note) == (None, "Bring keys")
     # Clearing the description removes the note.
     await entity.async_update_event(
         uid(entry, MONDAY),
-        {**unchanged, "description": "Main roster · Week 1"},
+        {
+            **unchanged,
+            "summary": "Open (Changed)",
+            "description": "Main roster · Week 1",
+        },
     )
     assert not entry.runtime_data.data.exceptions
 

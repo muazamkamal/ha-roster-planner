@@ -1,4 +1,6 @@
 import type { DayAssignment, ShiftType } from "../types";
+import { formatClock } from "../dates";
+import { useHass, useRoster } from "../hooks";
 
 const CUSTOM = "__custom";
 const OFF = "__off";
@@ -21,6 +23,10 @@ export const AssignmentPicker = ({
   onChange: (value: DayAssignment) => void;
   allowOff?: boolean;
 }) => {
+  const { locale } = useHass();
+  const { config } = useRoster();
+  const timeFormat = locale?.time_format ?? "24";
+  const timeLocale = locale?.language ?? "en";
   const change = (selected: string) => {
     if (selected === OFF) onChange({ type: "off" });
     else if (selected === CUSTOM)
@@ -37,7 +43,9 @@ export const AssignmentPicker = ({
         {allowOff && <option value={OFF}>Off</option>}
         {shiftTypes.map((shiftType) => (
           <option key={shiftType.id} value={shiftType.id}>
-            {shiftType.name} ({shiftType.start}–{shiftType.end})
+            {shiftType.name || config.default_shift_name} (
+            {formatClock(shiftType.start, timeFormat, timeLocale)}–
+            {formatClock(shiftType.end, timeFormat, timeLocale)})
           </option>
         ))}
         <option value={CUSTOM}>Custom times</option>

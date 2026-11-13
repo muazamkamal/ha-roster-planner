@@ -5,7 +5,7 @@ import { FormError, Sheet } from "./ui";
 
 interface Option {
   id: string;
-  name: string;
+  name: string | null;
 }
 
 /** Confirms a delete. If the item is in use, offers to replace it instead. */
@@ -20,7 +20,7 @@ export const DeleteSheet = ({
   replacements?: Option[];
   onClose: () => void;
 }) => {
-  const { api } = useRoster();
+  const { api, config } = useRoster();
   const { error, busy, submit } = useSubmit();
   const [replaceWith, setReplaceWith] = useState(replacements[0]?.id ?? "");
   const inUse = error?.code === "in_use";
@@ -30,7 +30,10 @@ export const DeleteSheet = ({
   };
 
   return (
-    <Sheet title={`Delete ${item.name}?`} onClose={onClose}>
+    <Sheet
+      title={`Delete ${item.name || config.default_shift_name}?`}
+      onClose={onClose}
+    >
       <FormError error={error} />
       {inUse && replacements.length > 0 && (
         <select
@@ -40,7 +43,7 @@ export const DeleteSheet = ({
         >
           {replacements.map((option) => (
             <option key={option.id} value={option.id}>
-              Replace with {option.name}
+              Replace with {option.name || config.default_shift_name}
             </option>
           ))}
         </select>

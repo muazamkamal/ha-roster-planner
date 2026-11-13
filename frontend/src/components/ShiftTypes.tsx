@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { endsNextDay } from "../dates";
-import { useRoster, useSubmit } from "../hooks";
+import { endsNextDay, formatClock } from "../dates";
+import { useHass, useRoster, useSubmit } from "../hooks";
 import type { ShiftType } from "../types";
 import { DeleteSheet } from "./DeleteSheet";
 import { Field, FieldError, FormError } from "./ui";
@@ -24,13 +24,17 @@ const Form = ({
 }) => {
   const { api } = useRoster();
   const { error, busy, submit } = useSubmit();
-  const [form, setForm] = useState({ ...BLANK, ...item });
+  const [form, setForm] = useState({
+    ...BLANK,
+    ...item,
+    name: item?.name ?? "",
+  });
   const set = (key: keyof typeof BLANK, value: string) =>
     setForm((current) => ({ ...current, [key]: value }));
 
   const save = async () => {
     const payload = {
-      name: form.name,
+      name: form.name || null,
       start: form.start,
       end: form.end,
       colour: form.colour,
@@ -46,8 +50,9 @@ const Form = ({
 
   return (
     <div className="form">
-      <Field label="Name">
+      <Field label="Name (optional)">
         <input
+          placeholder="Uses the default shift name"
           value={form.name}
           onChange={(event) => set("name", event.target.value)}
         />
@@ -105,6 +110,9 @@ const Form = ({
 
 export const ShiftTypes = () => {
   const { config } = useRoster();
+  const { locale } = useHass();
+  const timeFormat = locale?.time_format ?? "24";
+  const timeLocale = locale?.language ?? "en";
   const [editing, setEditing] = useState<ShiftType | "new" | null>(null);
   const [deleting, setDeleting] = useState<ShiftType | null>(null);
 
@@ -129,10 +137,11 @@ export const ShiftTypes = () => {
             >
               <span className="swatch" style={{ background: item.colour }} />
               <span>
-                {item.name}
+                {item.name || config.default_shift_name}
                 <span className="muted">
                   {" "}
-                  {item.start}–{item.end}
+                  {formatClock(item.start, timeFormat, timeLocale)}–
+                  {formatClock(item.end, timeFormat, timeLocale)}
                   {endsNextDay(item.start, item.end) ? " (+1)" : ""}
                 </span>
               </span>

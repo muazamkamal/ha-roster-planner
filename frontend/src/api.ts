@@ -76,6 +76,10 @@ export class RosterApi {
     });
   }
 
+  setDefaultShiftName(name: string) {
+    return this.send<void>("default_shift_name/set", { name });
+  }
+
   clearException(date: string) {
     return this.send<void>("exception/clear", { date });
   }

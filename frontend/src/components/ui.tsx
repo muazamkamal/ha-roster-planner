@@ -23,15 +23,18 @@ export const IconButton = ({
   label,
   onClick,
   disabled,
+  slot,
 }: {
   path: string;
   label: string;
   onClick: () => void;
   disabled?: boolean;
+  slot?: string;
 }) => (
   <button
     type="button"
     className="icon-button"
+    slot={slot}
     aria-label={label}
     title={label}
     onClick={onClick}
@@ -45,10 +48,12 @@ export const Sheet = ({
   title,
   onClose,
   children,
+  wide = false,
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  wide?: boolean;
 }) => {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -59,9 +64,12 @@ export const Sheet = ({
   }, [onClose]);
 
   return (
-    <div className="sheet-backdrop" onClick={onClose}>
+    <div
+      className={`sheet-backdrop${wide ? " wide-sheet" : ""}`}
+      onClick={onClose}
+    >
       <div
-        className="sheet"
+        className={`sheet${wide ? " wide-sheet" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={title}

@@ -220,6 +220,37 @@ def test_variation_days_mode_listed_off_cancels():
     assert title(date(2026, 11, 23), data) is None
 
 
+def test_unnamed_shift_uses_roster_default():
+    data = build(
+        [
+            {
+                "id": "p",
+                "name": "P",
+                "days": {"mon": shift("open")},
+            }
+        ],
+        [rotation(["p"])],
+    )
+    data.shift_types["open"].name = None
+    data.set_default_shift_name("Work")
+    assert title(ANCHOR, data) == "Work"
+
+
+def test_unlabelled_custom_shift_uses_roster_default():
+    data = build(
+        [],
+        [],
+        exceptions=[
+            {
+                "date": ANCHOR.isoformat(),
+                "assignment": {"type": "custom", "start": "09:00", "end": "17:00"},
+            }
+        ],
+    )
+    data.set_default_shift_name("Work")
+    assert title(ANCHOR, data) == "Work"
+
+
 def test_day_after_variation_end_reverts():
     data = build(
         [{"id": "p", "name": "P", "days": {"tue": shift("open")}}, TUESDAY_ONLY],

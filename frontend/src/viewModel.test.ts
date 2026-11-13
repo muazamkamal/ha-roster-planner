@@ -240,7 +240,7 @@ describe("describeAssignment", () => {
   it("shows custom times with a next-day marker", () => {
     expect(
       describeAssignment({ type: "custom", start: "22:00", end: "06:00" }, []),
-    ).toBe("Custom 22:00–06:00 (+1)");
+    ).toBe("Shift 22:00–06:00 (+1)");
   });
 });
 

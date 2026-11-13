@@ -8,7 +8,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import type { Weekday } from "./types";
+import type { TimeFormat, Weekday } from "./types";
 import { WEEKDAYS } from "./types";
 
 // Dates are YYYY-MM-DD strings everywhere. date-fns only sees them as local
@@ -64,12 +64,33 @@ export const todayIn = (timeZone: string, now: Date = new Date()): string => {
   return `${part("year")}-${part("month")}-${part("day")}`;
 };
 
+/** Formats an HA wall-clock time without converting it to the browser timezone. */
+export const formatClock = (
+  time: string,
+  timeFormat: TimeFormat = "24",
+  locale = "en",
+): string => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const date = new Date(Date.UTC(2000, 0, 1, hours, minutes));
+  const hourCycle =
+    timeFormat === "12" ? "h12" : timeFormat === "24" ? "h23" : undefined;
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+    ...(hourCycle ? { hourCycle } : {}),
+  }).format(date);
+};
+
 /**
  * The HH:MM of an ISO datetime as written. The API sends times in HA's zone, so
  * reading them straight off the string shows HA's wall clock in any browser.
  */
-export const clockOf = (isoDateTime: string): string =>
-  isoDateTime.slice(11, 16);
+export const clockOf = (
+  isoDateTime: string,
+  timeFormat: TimeFormat = "24",
+  locale = "en",
+): string => formatClock(isoDateTime.slice(11, 16), timeFormat, locale);
 
 /** True if a shift's end falls on a later date than its start. */
 export const crossesMidnight = (start: string, end: string): boolean =>

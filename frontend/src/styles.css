@@ -19,10 +19,6 @@ p {
   margin: 0;
 }
 
-.app {
-  min-height: 100vh;
-}
-
 .muted {
   color: var(--secondary-text-color);
 }
@@ -37,37 +33,22 @@ p {
   font-size: 13px;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 56px;
-  padding: 0 8px;
-  padding-top: env(safe-area-inset-top);
-  color: var(--app-header-text-color, #fff);
-  background: var(--app-header-background-color, var(--primary-color));
-}
-
-.header h1,
 .roster-switcher {
-  flex: 1;
+  width: auto;
   min-width: 0;
-  margin-left: 8px;
-  font-size: 20px;
-  font-weight: 400;
+  max-width: 100%;
+  min-height: 40px;
+  padding: 0 8px;
+  color: var(--app-header-text-color, var(--primary-text-color));
+  font: inherit;
+  background: transparent;
+  border: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.header select.roster-switcher {
-  width: auto;
-  color: inherit;
-  background: transparent;
-  border: none;
-}
-
-.header select.roster-switcher option {
+.roster-switcher option {
   color: var(--primary-text-color);
   background: var(--card-background-color);
 }
@@ -316,6 +297,22 @@ p {
   overflow-y: auto;
   background: var(--card-background-color);
   border-radius: 16px 16px 0 0;
+}
+
+.sheet.wide-sheet {
+  max-width: 760px;
+  max-height: 90vh;
+  border-radius: 16px 16px 0 0;
+}
+
+@media (min-width: 600px) {
+  .sheet-backdrop.wide-sheet {
+    align-items: center;
+  }
+
+  .sheet.wide-sheet {
+    border-radius: 16px;
+  }
 }
 
 .sheet h2 {

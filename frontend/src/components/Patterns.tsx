@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRoster, useSubmit } from "../hooks";
+import { useHass, useRoster, useSubmit } from "../hooks";
 import type { DayAssignment, Days, WeekPattern } from "../types";
 import { WEEKDAYS } from "../types";
 import { describeAssignment, weekdayName } from "../viewModel";
@@ -83,6 +83,9 @@ const Form = ({
 
 export const Patterns = () => {
   const { config } = useRoster();
+  const { locale } = useHass();
+  const timeFormat = locale?.time_format ?? "24";
+  const timeLocale = locale?.language ?? "en";
   const [editing, setEditing] = useState<
     (Pick<WeekPattern, "name" | "days"> & { id?: string }) | null
   >(null);
@@ -111,7 +114,7 @@ export const Patterns = () => {
                   )
                     .map(
                       (weekday) =>
-                        `${weekdayName(weekday).slice(0, 3)} ${describeAssignment(item.days[weekday], config.shift_types)}`,
+                        `${weekdayName(weekday).slice(0, 3)} ${describeAssignment(item.days[weekday], config.shift_types, timeFormat, timeLocale, config.default_shift_name)}`,
                     )
                     .join(" · ") || "All off"}
                 </span>

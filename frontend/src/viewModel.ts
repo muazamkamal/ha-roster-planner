@@ -2,6 +2,7 @@ import {
   clockOf,
   crossesMidnight,
   endsNextDay,
+  formatClock,
   formatDay,
   mondayOf,
   shiftDays,
@@ -15,14 +16,19 @@ import type {
   RosterException,
   Rotation,
   ShiftType,
+  TimeFormat,
   Variation,
   Weekday,
 } from "./types";
 import { WEEKDAYS } from "./types";
 
-export const timeRange = (shift: Resolved): string => {
+export const timeRange = (
+  shift: Resolved,
+  timeFormat: TimeFormat = "24",
+  locale = "en",
+): string => {
   const suffix = crossesMidnight(shift.start, shift.end) ? " (+1)" : "";
-  return `${clockOf(shift.start)}–${clockOf(shift.end)}${suffix}`;
+  return `${clockOf(shift.start, timeFormat, locale)}–${clockOf(shift.end, timeFormat, locale)}${suffix}`;
 };
 
 export type Marker = "extra" | "changed" | "note" | null;
@@ -48,12 +54,15 @@ export interface DayActions {
 export const assignmentOf = (
   shift: Resolved,
   shiftTypes: ShiftType[],
+  defaultShiftName = "Shift",
 ): DayAssignment => {
   const start = clockOf(shift.start);
   const end = clockOf(shift.end);
   const match = shiftTypes.find(
     (item) =>
-      item.name === shift.title && item.start === start && item.end === end,
+      (item.name || defaultShiftName) === shift.title &&
+      item.start === start &&
+      item.end === end,
   );
   if (match) return { type: "shift", shift_type_id: match.id };
   return { type: "custom", start, end, label: shift.title };
@@ -68,15 +77,22 @@ export const actionsFor = (day: DayDetail): DayActions => ({
 });
 
 /** One muted line saying where the day's result came from. */
-export const originLine = (day: DayDetail): string => {
+export const originLine = (
+  day: DayDetail,
+  timeFormat: TimeFormat = "24",
+  locale = "en",
+): string => {
   const { shift, base } = day;
   if (!shift) {
-    if (day.exception && base) return `Cancelled · usually ${timeRange(base)}`;
+    if (day.exception && base)
+      return `Cancelled · usually ${timeRange(base, timeFormat, locale)}`;
     return "";
   }
   if (shift.source === "exception") {
     if (shift.flag === "extra") return "Extra shift";
-    return base ? `Changed · usually ${timeRange(base)}` : "Changed";
+    return base
+      ? `Changed · usually ${timeRange(base, timeFormat, locale)}`
+      : "Changed";
   }
   if (shift.source === "variation") return `From ${shift.source_name}`;
   return `From ${shift.source_name} · Week ${shift.week}`;
@@ -90,11 +106,17 @@ export const nextShift = (days: DayDetail[], now: number): Resolved | null => {
   return null;
 };
 
-export const summaryLine = (shift: Resolved | null, now: number): string => {
+export const summaryLine = (
+  shift: Resolved | null,
+  now: number,
+  timeFormat: TimeFormat = "24",
+  locale = "en",
+): string => {
   if (!shift) return "No upcoming shifts";
   const running = new Date(shift.start).getTime() <= now;
-  if (running) return `On shift until ${clockOf(shift.end)}`;
-  return `Next shift: ${formatDay(shift.date, "EEE")} ${timeRange(shift)}`;
+  if (running)
+    return `On shift until ${clockOf(shift.end, timeFormat, locale)}`;
+  return `Next shift: ${formatDay(shift.date, "EEE")} ${timeRange(shift, timeFormat, locale)}`;
 };
 
 const WEEKDAY_NAMES: Record<Weekday, string> = {
@@ -112,15 +134,18 @@ export const weekdayName = (weekday: Weekday): string => WEEKDAY_NAMES[weekday];
 export const describeAssignment = (
   assignment: DayAssignment | undefined,
   shiftTypes: ShiftType[],
+  timeFormat: TimeFormat = "24",
+  locale = "en",
+  defaultShiftName = "Shift",
 ): string => {
   if (!assignment || assignment.type === "off") return "Off";
   if (assignment.type === "custom") {
     const suffix = endsNextDay(assignment.start, assignment.end) ? " (+1)" : "";
-    return `${assignment.label ?? "Custom"} ${assignment.start}–${assignment.end}${suffix}`;
+    return `${assignment.label || defaultShiftName} ${formatClock(assignment.start, timeFormat, locale)}–${formatClock(assignment.end, timeFormat, locale)}${suffix}`;
   }
   return (
-    shiftTypes.find((item) => item.id === assignment.shift_type_id)?.name ??
-    "Unknown"
+    shiftTypes.find((item) => item.id === assignment.shift_type_id)?.name ||
+    defaultShiftName
   );
 };
 
@@ -165,8 +190,9 @@ export const recurringShift = (
   weekday: Weekday,
   shiftType: ShiftType,
   start: string,
+  defaultShiftName = "Shift",
 ) => {
-  const name = `Every ${everyWeeks === 1 ? "week" : `${everyWeeks} weeks`}: ${weekdayName(weekday)} ${shiftType.name}`;
+  const name = `Every ${everyWeeks === 1 ? "week" : `${everyWeeks} weeks`}: ${weekdayName(weekday)} ${shiftType.name || defaultShiftName}`;
   return {
     pattern: {
       name,
@@ -201,9 +227,18 @@ export const groupVariations = (variations: Variation[], today: string) => {
 export const describeException = (
   exception: RosterException,
   shiftTypes: ShiftType[],
+  timeFormat: TimeFormat = "24",
+  locale = "en",
+  defaultShiftName = "Shift",
 ): string => {
   if (!exception.assignment) return `Note · ${exception.note ?? ""}`;
-  const change = describeAssignment(exception.assignment, shiftTypes);
+  const change = describeAssignment(
+    exception.assignment,
+    shiftTypes,
+    timeFormat,
+    locale,
+    defaultShiftName,
+  );
   return exception.note ? `${change} · ${exception.note}` : change;
 };
 

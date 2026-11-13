@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { formatDay } from "../dates";
-import { useRoster, useSubmit } from "../hooks";
+import { useHass, useRoster, useSubmit } from "../hooks";
 import type { DayAssignment, DayDetail, ShiftType } from "../types";
 import { actionsFor, assignmentOf, originLine, timeRange } from "../viewModel";
 import { AssignmentPicker } from "./AssignmentPicker";
@@ -10,10 +10,11 @@ import { Field, FormError, Sheet } from "./ui";
 const initialAssignment = (
   day: DayDetail,
   shiftTypes: ShiftType[],
+  defaultShiftName: string,
 ): DayAssignment => {
   const current = day.exception?.assignment;
   if (current && current.type !== "off") return current;
-  if (day.shift) return assignmentOf(day.shift, shiftTypes);
+  if (day.shift) return assignmentOf(day.shift, shiftTypes, defaultShiftName);
   return shiftTypes[0]
     ? { type: "shift", shift_type_id: shiftTypes[0].id }
     : { type: "custom", start: "09:00", end: "17:00" };
@@ -27,14 +28,17 @@ export const DaySheet = ({
   onClose: () => void;
 }) => {
   const { api, config, canEdit } = useRoster();
+  const { locale } = useHass();
+  const timeFormat = locale?.time_format ?? "24";
+  const timeLocale = locale?.language ?? "en";
   const { error, busy, submit } = useSubmit();
   const [editing, setEditing] = useState(false);
   const [note, setNote] = useState(day.exception?.note ?? "");
   const [assignment, setAssignment] = useState<DayAssignment>(() =>
-    initialAssignment(day, config.shift_types),
+    initialAssignment(day, config.shift_types, config.default_shift_name),
   );
   const actions = actionsFor(day);
-  const origin = originLine(day);
+  const origin = originLine(day, timeFormat, timeLocale);
   const savedNote = day.exception?.note ?? "";
   const noteChanged = note.trim() !== savedNote;
 
@@ -62,7 +66,8 @@ export const DaySheet = ({
             className="colour-bar"
             style={{ background: day.shift.colour }}
           />
-          <strong>{timeRange(day.shift)}</strong> {day.shift.title}
+          <strong>{timeRange(day.shift, timeFormat, timeLocale)}</strong>{" "}
+          {day.shift.title}
         </p>
       ) : (
         <p className="sheet-shift muted">Off</p>
